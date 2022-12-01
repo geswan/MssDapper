@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System.Data.SqlClient;
 using System.Data;
-using MySqlConnector;
 using Dapper;
 using System.Runtime.ExceptionServices;
 using System.Transactions;
@@ -13,7 +12,7 @@ namespace DataAccess;
 public class MssDataAccessSql : IDataAccess
 {
     private readonly IConfiguration _config;
-    private const string defaultId = "Default";//must be a const
+    private const string msConnectionId = "MsSql";//must be a const
     public MssDataAccessSql(IConfiguration config)
     {
         _config = config;
@@ -24,7 +23,7 @@ public class MssDataAccessSql : IDataAccess
         string? connectionId = null,
         CommandType? commandType = null)
     {
-        connectionId ??= defaultId;
+        connectionId ??= msConnectionId;
         using IDbConnection connection = new SqlConnection(_config.GetConnectionString(connectionId));
         var result = await connection.QueryAsync<T>(sql, parameters,
             commandType: commandType);
@@ -38,7 +37,7 @@ public class MssDataAccessSql : IDataAccess
        string? connectionId = null,
        CommandType? commandType = null)
     {
-        connectionId ??= defaultId;
+        connectionId ??= msConnectionId;
         using IDbConnection connection = new SqlConnection(_config.GetConnectionString(connectionId));
         var result = await connection.QuerySingleAsync<T>(sql, parameters,
             commandType: commandType);
@@ -52,7 +51,7 @@ public class MssDataAccessSql : IDataAccess
      string? connectionId = null,
     CommandType? commandType = null)
     {
-        connectionId ??= defaultId;
+        connectionId ??= msConnectionId;
         using IDbConnection cnn = new SqlConnection(_config.GetConnectionString(connectionId));
 
         var result = await cnn.QueryAsync<dynamic>(sql, parameters, commandType: commandType);
@@ -70,7 +69,7 @@ public class MssDataAccessSql : IDataAccess
        string? connectionId = null,
        CommandType? commandType = null)
     {
-        connectionId ??= defaultId;
+        connectionId ??= msConnectionId;
         using IDbConnection connection = new SqlConnection(_config.GetConnectionString(connectionId));
         var result = await connection.QueryFirstOrDefaultAsync<T>(sql, parameters,
          commandType: commandType);
@@ -85,10 +84,10 @@ public class MssDataAccessSql : IDataAccess
          string splitOn = "Id",//dapper converts this to  uppercase so ID is accepted
         CommandType? commandType = null)
     {
-        connectionId ??= defaultId;
-        using IDbConnection cnn = new SqlConnection(_config.GetConnectionString(connectionId));
+        connectionId ??= msConnectionId;
+        using IDbConnection connection = new SqlConnection(_config.GetConnectionString(connectionId));
 
-        var results = await cnn.QueryAsync(sql, mappingFunc, splitOn: splitOn, commandType: commandType);
+        var results = await connection.QueryAsync(sql, mappingFunc, splitOn: splitOn, commandType: commandType);
 
         return results;
 
@@ -99,10 +98,9 @@ public class MssDataAccessSql : IDataAccess
         string? connectionId = null,
         CommandType? commandType = null)
     {
-        connectionId ??= defaultId;
+        connectionId ??= msConnectionId;
         using IDbConnection connection = new SqlConnection(_config.GetConnectionString(connectionId));
-        await connection.ExecuteAsync(sql, parameters,
-           commandType: commandType);
+        await connection.ExecuteAsync(sql, parameters, commandType: commandType);
 
     }
 
@@ -112,8 +110,8 @@ public class MssDataAccessSql : IDataAccess
     string? connectionId = null
    )
     {
-        connectionId ??= defaultId;
-        using IDbConnection connection = new MySqlConnection(_config.GetConnectionString(connectionId));
+        connectionId ??= msConnectionId;
+        using IDbConnection connection = new SqlConnection(_config.GetConnectionString(connectionId));
         int totalInserts = 0;
         foreach (var p in parameters)
         {
@@ -132,7 +130,7 @@ public class MssDataAccessSql : IDataAccess
       string? connectionId = null,
       CommandType? commandType = null)
     {
-        connectionId ??= defaultId;
+        connectionId ??= msConnectionId;
         using IDbConnection connection = new SqlConnection(_config.GetConnectionString(connectionId));
         using var transScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
         connection.Open();

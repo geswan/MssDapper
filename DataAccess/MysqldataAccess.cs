@@ -11,7 +11,7 @@ namespace DataAccess;
 public class MysqldataAccess : IDataAccess
 {
     private readonly IConfiguration _config;
-    private const string defaultId = "MySql";//must be a const
+    private const string mySqlConnectionId = "MySql";//must be a const
     public MysqldataAccess(IConfiguration config)
     {
         _config = config;
@@ -23,7 +23,7 @@ public class MysqldataAccess : IDataAccess
           CommandType? commandType = null)
     {
 
-        connectionId ??= defaultId;
+        connectionId ??= mySqlConnectionId;
         using IDbConnection connection = new MySqlConnection(_config.GetConnectionString(connectionId));
         var result = await connection.QueryAsync<T>(sql, parameters,
             commandType: commandType);
@@ -36,7 +36,7 @@ public class MysqldataAccess : IDataAccess
         string? connectionId = null,
        CommandType? commandType = null)
     {
-        connectionId ??= defaultId;
+        connectionId ??= mySqlConnectionId;
         using IDbConnection connection = new MySqlConnection(_config.GetConnectionString(connectionId));
         var result = await connection.QuerySingleAsync<T>(sql, parameters,
             commandType: commandType);
@@ -50,7 +50,7 @@ public class MysqldataAccess : IDataAccess
      string? connectionId = null
     )
     {
-        connectionId ??= defaultId;
+        connectionId ??= mySqlConnectionId;
         using IDbConnection connection = new MySqlConnection(_config.GetConnectionString(connectionId));
         int totalInserts = 0;
         foreach (var p in parameters)
@@ -68,7 +68,7 @@ public class MysqldataAccess : IDataAccess
        string? connectionId = null,
        CommandType? commandType = null)
     {
-        connectionId ??= defaultId;
+        connectionId ??= mySqlConnectionId;
         using IDbConnection connection = new MySqlConnection(_config.GetConnectionString(connectionId));
         var result = await connection.QueryFirstOrDefaultAsync<T>(sql, parameters,
          commandType: commandType);
@@ -83,10 +83,10 @@ public class MysqldataAccess : IDataAccess
           string splitOn = "Id",//default is where splitOn.ToUpper()==ID
          CommandType? commandType = null)
     {
-        connectionId ??= defaultId;
-        using IDbConnection cnn = new MySqlConnection(_config.GetConnectionString(connectionId));
+        connectionId ??= mySqlConnectionId;
+        using IDbConnection connection = new MySqlConnection(_config.GetConnectionString(connectionId));
 
-        var results = await cnn.QueryAsync(sql, mappingFunc, splitOn: splitOn, commandType: commandType);
+        var results = await connection.QueryAsync(sql, mappingFunc, splitOn: splitOn, commandType: commandType);
 
         return results;
 
@@ -98,10 +98,10 @@ public class MysqldataAccess : IDataAccess
         string? connectionId = null,
         CommandType? commandType = null)
     {
-        connectionId ??= defaultId;
-        using IDbConnection cnn = new MySqlConnection(_config.GetConnectionString(connectionId));
+        connectionId ??= mySqlConnectionId;
+        using IDbConnection connection = new MySqlConnection(_config.GetConnectionString(connectionId));
 
-        var result = await cnn.QueryAsync<dynamic>(sql, parameters, commandType: commandType);
+        var result = await connection.QueryAsync<dynamic>(sql, parameters, commandType: commandType);
 
         return result;
 
@@ -112,7 +112,7 @@ public class MysqldataAccess : IDataAccess
         string? connectionId = null,
         CommandType? commandType = null)
     {
-        connectionId ??= defaultId;
+        connectionId ??= mySqlConnectionId;
         using IDbConnection connection = new MySqlConnection(_config.GetConnectionString(connectionId)); ;
         await connection.ExecuteAsync(sql, parameters,
            commandType: commandType);
@@ -127,7 +127,7 @@ public class MysqldataAccess : IDataAccess
       string? connectionId = null,
       CommandType? commandType = null)
     {
-        connectionId ??= defaultId;
+        connectionId ??= mySqlConnectionId;
         using IDbConnection connection = new MySqlConnection(_config.GetConnectionString(connectionId));
         using var transScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
         connection.Open();
