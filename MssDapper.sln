@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33103.184
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MssDapper", "MssDapper\MssDapper.csproj", "{9F9430C2-8F25-4EEE-9FB3-B3D51C342608}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MssDapper", "MssDapper\MssDapper.csproj", "{9F9430C2-8F25-4EEE-9FB3-B3D51C342608}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccess", "DataAccess\DataAccess.csproj", "{B81A6F1B-9B30-4773-A97C-E1BCADB6089C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccess", "DataAccess\DataAccess.csproj", "{B81A6F1B-9B30-4773-A97C-E1BCADB6089C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MsSqlHelpers", "..\..\SqlGenerator\mssql-helpers-main\src\MsSqlHelpers\MsSqlHelpers.csproj", "{87B042EA-E5DA-4D7F-8595-3D0AF7F84038}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{B81A6F1B-9B30-4773-A97C-E1BCADB6089C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B81A6F1B-9B30-4773-A97C-E1BCADB6089C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B81A6F1B-9B30-4773-A97C-E1BCADB6089C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87B042EA-E5DA-4D7F-8595-3D0AF7F84038}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87B042EA-E5DA-4D7F-8595-3D0AF7F84038}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87B042EA-E5DA-4D7F-8595-3D0AF7F84038}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87B042EA-E5DA-4D7F-8595-3D0AF7F84038}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

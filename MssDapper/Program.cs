@@ -30,8 +30,8 @@ static IHostBuilder CreateDefaultBuilder()
         .ConfigureServices(services =>
         {
             services.AddTransient<StringBuilder>();
-            //services.AddSingleton<IDataAccess,MssDataAccessSql>();
-            services.AddSingleton<IDataAccess, MysqldataAccess>();
+           services.AddSingleton<IDataAccess,MssDataAccessSql>();
+           // services.AddSingleton<IDataAccess, MysqldataAccess>();
             services.AddTransient<SpExampleIds>();
             services.AddTransient<Helper>();
             services.AddTransient<Examples>();

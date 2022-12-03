@@ -5,14 +5,6 @@ namespace MssDapper
     public class Helper
     {
         private IDataAccess _dba;
-//        private List<string> formatstrings = new()
-//{
-//"    {0,-20:G}   {1,6:G}",
-//"    {0,-15:G} {1,-15:G} {2,12:G}",
-//"    {0,-20:G} {1,10:G}",
-//"    {0,-31:G} {1,10:G} ",
-//"    {0,-30:G}{1,12:C2}"
-//};
         public Helper(IDataAccess dba)
         {
             _dba = dba;

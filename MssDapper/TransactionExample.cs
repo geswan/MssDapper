@@ -23,8 +23,11 @@ namespace MssDapper
                 LastName = "Mouse",
                 BirthDate = new DateTime(2021, 12, 01)
             };
-            var idMicroA = await _dba.QuerySingleAsync<int>(_spIds.InsertEmployeeSQL, employee);
-            var idMicroB = await _dba.QuerySingleAsync<int>(_spIds.InsertEmployeeSQL, employee);
+            string connectionId = _dba.GetConnectionId();
+            string sql = connectionId == "MySql" ? _spIds.InsertEmployeeMySQL : _spIds.InsertEmployeeMssSQL;
+
+            var idMicroA = await _dba.QuerySingleAsync<int>(sql, employee);
+            var idMicroB = await _dba.QuerySingleAsync<int>(sql, employee);
             Console.WriteLine($"2 Micro mice inserted into the Employees table. Id mouse A is {idMicroA} Id mouse B is {idMicroB}");
             Console.WriteLine($"Executing a transaction to remove both mice...");
             Console.WriteLine($"The Id for Mouse A is correctly set but the Id for Mouse B is set to 0 and should throw an exception");

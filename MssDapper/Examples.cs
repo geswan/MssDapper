@@ -2,6 +2,12 @@
 using DataAccess;
 using Microsoft.Extensions.Logging;
 using System.Data;
+using MsSqlHelpers;
+using System;
+using System.Text;
+using System.Xml.Linq;
+using System.Collections.Generic;
+using System.Collections;
 
 namespace MssDapper;
 
@@ -53,20 +59,46 @@ public class Examples
         Console.WriteLine(_helper.Format3ColsWide, "City", "Region", "Contact Name");
         return _helper.PressReturnToContinue();
     }
-    //***Inserts 5 records** 
+    //https://www.codeproject.com/Articles/5275840/Dynamic-Query-Builder-for-Dapper
+    public async Task BulkInsertEmployeesAsync(IEnumerable<Employee> employees)
+    {
+        //build a list of the Employees table column names 
+        //to indicate where the values are to be inserted
+
+        List<string> colNames = new();
+        Employee e;
+
+        colNames.Add(nameof(e.LastName));
+        colNames.Add(nameof(e.FirstName));
+        colNames.Add(nameof(e.BirthDate));
+
+
+        //insert the input parameters into a key/value dictionary
+        //the parameters are designated @p0 to @pn
+        Dictionary<string, object> paramDic = new();
+
+        int i = -1;
+        foreach (var employee in employees)
+        {
+
+            paramDic.Add($"@p{++i}", employee.LastName);
+            paramDic.Add($"@p{++i}", employee.FirstName);
+            paramDic.Add($"@p{++i}", employee.BirthDate);
+
+
+        }
+
+        //pass the required parameters to the BulkInsertAsync Method
+        await _dba.BulkInsertAsync("Employees", paramDic, colNames);
+
+    }
+
     public async Task<bool> BulkInsertAsync()
     {
         int recordsToInsert = 5;
-        List<DynamicParameters> dynamicParametersList = new();
-        foreach (var employee in GenerateRandomEmployees(recordsToInsert))
-        {
-            var parameters = new DynamicParameters(new { employee.LastName, employee.FirstName, employee.BirthDate });
-            dynamicParametersList.Add(parameters);
-        }
-
-        string sql = _spIds.SpInsertEmployee;
-        var totalInserts = await _dba.BulkInsertAsync(sql, dynamicParametersList);
-        Console.WriteLine($"Inserted {totalInserts} records");
+        var employees = GenerateRandomEmployees(recordsToInsert);
+     await   BulkInsertEmployeesAsync(employees);
+        Console.WriteLine($"{recordsToInsert} Records Inserted");
         return _helper.PressReturnToContinue();
     }
 
@@ -122,9 +154,16 @@ public class Examples
 
     public async Task<bool> StoredProcedureCustomerOrderHistoryAsync()
     {
-        string CustomerID = "ANTON";//input param
+        string connectionId = _dba.GetConnectionId();
+        (string paramName, object value) param;
+        string customerID = "ANTON";//input param
+        param = connectionId == "MsSql" ? ("@CustomerID", customerID) : ("AtCustomerID", customerID);
+        var paramDic = new Dictionary<string, object>
+        {
+           { param.paramName, param.value }
+        };
         var results = await _dba.QueryAsync<(string product, int total)>(_spIds.CustomerOrderHistory,
-        new { AtCustomerID = CustomerID }, commandType: CommandType.StoredProcedure);
+        new DynamicParameters(paramDic), commandType: CommandType.StoredProcedure);
 
         Console.WriteLine(_helper.Format2ColsWide, "Product Name", "Sales");
         int count = 0;
@@ -190,7 +229,9 @@ public class Examples
             LastName = "Mouse",
             BirthDate = new DateTime(1928, 01, 01)
         };
-        var id = await _dba.QuerySingleAsync<int>(_spIds.InsertEmployeeSQL, employee);
+        string connectionId = _dba.GetConnectionId();
+        string sql = connectionId == "MySql" ? _spIds.InsertEmployeeMySQL : _spIds.InsertEmployeeMssSQL;
+        var id = await _dba.QuerySingleAsync<int>(sql, employee);
         var foundEmployee = await _helper.GetFirstOrDefaultEmployeeAsync(id);
         Console.WriteLine($"The inserted record is {foundEmployee}");
         Console.WriteLine($"Repeats of this example will insert a cloned mouse with a different ID");

@@ -48,7 +48,7 @@ public class Demo
     {
         return choice switch
         {
-            "1" => await _examples.SubtotalGroupByAsync(),
+            "1" => await _examples.BulkInsertAsync(),//SubtotalGroupByAsync(),
             "2" => await _examples.GroupByACollectionOfParamsAsync(),
             "3" => await _examples.QueryReturningDynamicType(),
             "4" => await _examples.Map2TablesTo1OrdersAAsync(),

@@ -4,7 +4,7 @@ using System.Data;
 using Dapper;
 using System.Runtime.ExceptionServices;
 using System.Transactions;
-
+using System.Text;
 
 namespace DataAccess;
 
@@ -17,6 +17,8 @@ public class MssDataAccessSql : IDataAccess
     {
         _config = config;
     }
+
+    public string GetConnectionId() => msConnectionId;
     public async Task<IEnumerable<T>> QueryAsync<T>(
         string sql,
         object? parameters = null,
@@ -60,9 +62,6 @@ public class MssDataAccessSql : IDataAccess
 
     }
 
-
-
-
     public async Task<T> QueryFirstOrDefaultAsync<T>(
        string sql,
        object? parameters = null,
@@ -104,23 +103,32 @@ public class MssDataAccessSql : IDataAccess
 
     }
 
-    public async Task<int> BulkInsertAsync(
-    string sql,
-    IEnumerable<DynamicParameters> parameters,
-    string? connectionId = null
-   )
+
+
+    public async Task BulkInsertAsync(
+        string tableName,
+        Dictionary<string, object> paramDic,
+        IEnumerable<string> colNames,
+        string? connectionId = null
+        )
     {
         connectionId ??= msConnectionId;
-        using IDbConnection connection = new SqlConnection(_config.GetConnectionString(connectionId));
-        int totalInserts = 0;
-        foreach (var p in parameters)
+        int columnsPerRow = colNames.Count();
+        StringBuilder sb = new("(@p0");
+        for (int n = 1; n < paramDic.Count; n++)
         {
-            int result = await connection.ExecuteAsync(sql, p, commandType: CommandType.StoredProcedure);
-            // var id = await QuerySingleAsync<int>(sql, p, commandType: CommandType.StoredProcedure);
-            totalInserts += result;
+            string s = n % columnsPerRow == 0 ? $"),(@p{n}" : $",@p{n}";
+            //builds the values in this form: (@p0,@p1,@p2),(@p3,@p4,@p5),....
+            sb.Append(s);
         }
-        return totalInserts;
+        sb.Append(')');
+        string sql = $"INSERT INTO {tableName} ({string.Join(',', colNames)}) VALUES " + sb.ToString();
+
+        using IDbConnection connection =new SqlConnection(_config.GetConnectionString(connectionId));
+        await connection.ExecuteAsync(sql, new DynamicParameters(paramDic));
     }
+
+
 
     public async Task ExecuteTransactionAsync(
       string sqlA,
