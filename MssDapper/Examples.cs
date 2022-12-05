@@ -2,12 +2,7 @@
 using DataAccess;
 using Microsoft.Extensions.Logging;
 using System.Data;
-using MsSqlHelpers;
-using System;
-using System.Text;
-using System.Xml.Linq;
-using System.Collections.Generic;
-using System.Collections;
+using System.Reflection;
 
 namespace MssDapper;
 
@@ -92,12 +87,53 @@ public class Examples
         await _dba.BulkInsertAsync("Employees", paramDic, colNames);
 
     }
+    //public async Task BulkInsertItemsAsync<T>(
+    //    string table,
+    //    IEnumerable<T> items,
+    //    Dictionary<string,string>? mappingDic =null
+    //    )
+    //{
+    //    //build a list of the table column names 
+    //    //to indicate where the values are to be inserted
+    //   Type type=typeof(T);
+    //    List<string> colNames = new();
+    //    //select only public none-static properties
+    //    var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+    //    foreach (var prop in properties)
+    //        colNames.Add(prop.Name);
+    //    if(mappingDic!=null)
+    //    {
+    //        for(int j=0;j<colNames.Count;j++)
+    //        {
+    //            if (mappingDic.ContainsKey(colNames[j]))
+    //            {
+    //                colNames[j] = mappingDic[colNames[j]];
+    //            }
+    //        }
+    //    }
+    //    //insert the input parameters into a key/value dictionary
+    //    //the parameters are designated @p0 to @pn
+    //    Dictionary<string, object> paramDic = new();
 
+    //    int i = -1;
+    //    foreach (var item in items)
+    //    {
+    //        foreach (var prop in properties)
+    //        {
+    //            paramDic.Add($"@p{++i}", prop.GetValue(item)!);
+    //        }
+    //    }
+
+    //    //pass the required parameters to the BulkInsertAsync Method
+    //    await _dba.BulkInsertAsync(table, paramDic, colNames);
+
+    //}
     public async Task<bool> BulkInsertAsync()
     {
         int recordsToInsert = 5;
-        var employees = GenerateRandomEmployees(recordsToInsert);
-     await   BulkInsertEmployeesAsync(employees);
+        var employees = GenerateRandomEmployeesM(recordsToInsert);
+        Dictionary<string,string>mappingDic= new() { { "Surname", "LastName" } };
+     await   _dba.BulkInsertAsync<EmployeeM>("Employees",employees,mappingDic);
         Console.WriteLine($"{recordsToInsert} Records Inserted");
         return _helper.PressReturnToContinue();
     }
@@ -110,7 +146,7 @@ public class Examples
              where Suppliers.Country in @countries
              Group by Suppliers.Country
              Order by ProductCount Desc;";
-        var results = await _dba.QueryAsync<(string SuppliersCountry, int ProductCount)>(sql, new { countries = countryArray });
+        var results = await _dba.QueryAsync<(string SuppliersCountry, int ProductCount)>(sql, new { @countries = countryArray });
 
         Console.WriteLine(_helper.Format2ColsNarrow, "Suppliers' Country", "Product Count");
         int count = 0;
@@ -294,7 +330,22 @@ public class Examples
             yield return employee; ;
         }
     }
-        private IEnumerable<string> GenerateRandomStrings(int count, int length)
+
+    private IEnumerable<EmployeeM> GenerateRandomEmployeesM(int count)
+    {
+        foreach (string s in GenerateRandomStrings(count, 6))
+        {
+            EmployeeM employee = new()
+            {
+                EmployeeID = 0,
+                Surname = s.ToUpper(),
+                FirstName = s,
+                BirthDate = DateTime.Now
+            };
+            yield return employee; ;
+        }
+    }
+    private IEnumerable<string> GenerateRandomStrings(int count, int length)
     {
         var startPos = (int)'a';
         for (int n = 0; n < count; n++)
@@ -303,6 +354,7 @@ public class Examples
             for (int i = 0; i < length; i++)
             {
                 int r = random.Next(startPos, startPos + 26);
+                //a random mix of uppercase and lowercase letters
                 array[i] = r % 2 == 0 ? (char)r : char.ToUpper((char)r);
             }
             yield return new string(array);

@@ -43,6 +43,24 @@ public class Employee
     }
 }
 
+
+public class EmployeeM
+{
+    public int EmployeeID { get; set; }
+    public string Surname { get; set; }
+    public string FirstName { get; set; }
+    public DateTime BirthDate { get; set; }
+
+    public override string ToString()
+    {
+        return $" {FirstName} {Surname} {BirthDate.ToShortDateString()} Id {EmployeeID}";
+    }
+    public dynamic ToAnonType()
+    {
+        return new { Surname, FirstName, BirthDate };
+    }
+}
+
 //public class EmployeeOrder : Order
 //{
 //    public string LastName { get; set; }

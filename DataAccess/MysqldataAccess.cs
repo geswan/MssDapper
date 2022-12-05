@@ -1,10 +1,10 @@
-﻿using Microsoft.Extensions.Configuration;
-using System.Data;
-using Dapper;
+﻿using Dapper;
+using Microsoft.Extensions.Configuration;
 using MySqlConnector;
+using System.Data;
+using System.Data.SqlClient;
 using System.Runtime.ExceptionServices;
 using System.Transactions;
-using System.Text;
 
 namespace DataAccess;
 
@@ -46,27 +46,17 @@ public class MysqldataAccess : IDataAccess
         return result;
     }
 
-    public async Task BulkInsertAsync(
-        string tableName,
-        Dictionary<string, object> paramDic, 
-        IEnumerable<string> colNames,
-        string? connectionId = null
-        )
+    public async Task BulkInsertAsync<T>(
+  string table,
+  IEnumerable<T> items,
+  Dictionary<string, string>? mappingDic = null,
+  string? connectionId = null
+  )
     {
         connectionId ??= mySqlConnectionId;
-        int columnsPerRow = colNames.Count();
-        StringBuilder sb = new("(@p0");
-        for (int n = 1; n < paramDic.Count; n++)
-        {
-            string s = n % columnsPerRow == 0 ? $"),(@p{n}" : $",@p{n}";
-           //builds the values in this form: (@p0,@p1,@p2),(@p3,@p4,@p5),....
-            sb.Append(s);
-        }
-        sb.Append(')');
-        string sql = $"INSERT INTO {tableName} ({string.Join(',', colNames)}) VALUES " + sb.ToString();
+        using IDbConnection connection = new SqlConnection(_config.GetConnectionString(connectionId));
+        await connection.BulkInsertAsync(table, items, mappingDic!);
 
-        using IDbConnection connection = new MySqlConnection(_config.GetConnectionString(connectionId));
-        await connection.ExecuteAsync(sql, new DynamicParameters(paramDic));      
     }
 
     public async Task<T> QueryFirstOrDefaultAsync<T>(
