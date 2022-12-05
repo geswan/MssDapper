@@ -2,7 +2,6 @@
 using DataAccess;
 using Microsoft.Extensions.Logging;
 using System.Data;
-using System.Reflection;
 
 namespace MssDapper;
 
@@ -55,85 +54,14 @@ public class Examples
         return _helper.PressReturnToContinue();
     }
     //https://www.codeproject.com/Articles/5275840/Dynamic-Query-Builder-for-Dapper
-    public async Task BulkInsertEmployeesAsync(IEnumerable<Employee> employees)
-    {
-        //build a list of the Employees table column names 
-        //to indicate where the values are to be inserted
-
-        List<string> colNames = new();
-        Employee e;
-
-        colNames.Add(nameof(e.LastName));
-        colNames.Add(nameof(e.FirstName));
-        colNames.Add(nameof(e.BirthDate));
-
-
-        //insert the input parameters into a key/value dictionary
-        //the parameters are designated @p0 to @pn
-        Dictionary<string, object> paramDic = new();
-
-        int i = -1;
-        foreach (var employee in employees)
-        {
-
-            paramDic.Add($"@p{++i}", employee.LastName);
-            paramDic.Add($"@p{++i}", employee.FirstName);
-            paramDic.Add($"@p{++i}", employee.BirthDate);
-
-
-        }
-
-        //pass the required parameters to the BulkInsertAsync Method
-        await _dba.BulkInsertAsync("Employees", paramDic, colNames);
-
-    }
-    //public async Task BulkInsertItemsAsync<T>(
-    //    string table,
-    //    IEnumerable<T> items,
-    //    Dictionary<string,string>? mappingDic =null
-    //    )
-    //{
-    //    //build a list of the table column names 
-    //    //to indicate where the values are to be inserted
-    //   Type type=typeof(T);
-    //    List<string> colNames = new();
-    //    //select only public none-static properties
-    //    var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-    //    foreach (var prop in properties)
-    //        colNames.Add(prop.Name);
-    //    if(mappingDic!=null)
-    //    {
-    //        for(int j=0;j<colNames.Count;j++)
-    //        {
-    //            if (mappingDic.ContainsKey(colNames[j]))
-    //            {
-    //                colNames[j] = mappingDic[colNames[j]];
-    //            }
-    //        }
-    //    }
-    //    //insert the input parameters into a key/value dictionary
-    //    //the parameters are designated @p0 to @pn
-    //    Dictionary<string, object> paramDic = new();
-
-    //    int i = -1;
-    //    foreach (var item in items)
-    //    {
-    //        foreach (var prop in properties)
-    //        {
-    //            paramDic.Add($"@p{++i}", prop.GetValue(item)!);
-    //        }
-    //    }
-
-    //    //pass the required parameters to the BulkInsertAsync Method
-    //    await _dba.BulkInsertAsync(table, paramDic, colNames);
-
-    //}
+  
+  
     public async Task<bool> BulkInsertAsync()
     {
         int recordsToInsert = 5;
         var employees = GenerateRandomEmployeesM(recordsToInsert);
         Dictionary<string,string>mappingDic= new() { { "Surname", "LastName" } };
-     await   _dba.BulkInsertAsync<EmployeeM>("Employees",employees,mappingDic);
+     await   _dba.BulkInsertAsync("Employees",employees,mappingDic);
         Console.WriteLine($"{recordsToInsert} Records Inserted");
         return _helper.PressReturnToContinue();
     }
