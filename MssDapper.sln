@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MssDapper", "MssDapper\MssD
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccess", "DataAccess\DataAccess.csproj", "{B81A6F1B-9B30-4773-A97C-E1BCADB6089C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MsSqlHelpers", "..\..\SqlGenerator\mssql-helpers-main\src\MsSqlHelpers\MsSqlHelpers.csproj", "{87B042EA-E5DA-4D7F-8595-3D0AF7F84038}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{B81A6F1B-9B30-4773-A97C-E1BCADB6089C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B81A6F1B-9B30-4773-A97C-E1BCADB6089C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B81A6F1B-9B30-4773-A97C-E1BCADB6089C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{87B042EA-E5DA-4D7F-8595-3D0AF7F84038}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{87B042EA-E5DA-4D7F-8595-3D0AF7F84038}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{87B042EA-E5DA-4D7F-8595-3D0AF7F84038}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{87B042EA-E5DA-4D7F-8595-3D0AF7F84038}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

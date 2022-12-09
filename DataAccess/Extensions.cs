@@ -9,18 +9,20 @@ namespace DataAccess
     {
         public async static Task  BulkInsertAsync<T>(
             this IDbConnection connection,
-            string table,
-            IEnumerable<T> items,
-            Dictionary<string,string> mappingDic
+           IEnumerable<T> items,
+            Dictionary<string,string> mappingDic,
+             string? table=null
             )
         {
             //build a list of the table column names 
             //to indicate where the values are to be inserted
             Type type = typeof(T);
+            string? tableName = table ?? type.Name+'s';
             List<string> colNames = new();
             //select only public non-static properties
             //assume first property is identity and skip it
             var properties = (type.GetProperties(BindingFlags.Public | BindingFlags.Instance)).Skip(1);
+         
             foreach (var prop in properties)
             {
                 //map property names to Column names if needed
@@ -44,7 +46,7 @@ namespace DataAccess
             }
 
             
-           string sql= BuildSqlInsert(table, paramDic, colNames);
+           string sql= BuildSqlInsert(tableName, paramDic, colNames);
             await connection.ExecuteAsync(sql, new DynamicParameters(paramDic));
 
         }

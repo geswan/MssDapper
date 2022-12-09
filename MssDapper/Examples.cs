@@ -53,15 +53,24 @@ public class Examples
         Console.WriteLine(_helper.Format3ColsWide, "City", "Region", "Contact Name");
         return _helper.PressReturnToContinue();
     }
+
     //https://www.codeproject.com/Articles/5275840/Dynamic-Query-Builder-for-Dapper
-  
-  
+
+    public async Task<bool> BulkInsertAsyncMap()
+    {
+        int recordsToInsert = 5;
+        var employees = GenerateRandomEmployeesM(recordsToInsert);//Surname needs mapping
+        Dictionary<string,string>mappingDic= new() { { "Surname", "LastName" } };
+     await   _dba.BulkInsertAsync(employees,mappingDic,table:"Employees");
+        Console.WriteLine($"{recordsToInsert} Records Inserted");
+        return _helper.PressReturnToContinue();
+    }
+
     public async Task<bool> BulkInsertAsync()
     {
         int recordsToInsert = 5;
-        var employees = GenerateRandomEmployeesM(recordsToInsert);
-        Dictionary<string,string>mappingDic= new() { { "Surname", "LastName" } };
-     await   _dba.BulkInsertAsync("Employees",employees,mappingDic);
+        var employees = GenerateRandomEmployees(recordsToInsert);
+         await _dba.BulkInsertAsync(employees);
         Console.WriteLine($"{recordsToInsert} Records Inserted");
         return _helper.PressReturnToContinue();
     }
@@ -246,47 +255,31 @@ public class Examples
 
     private IEnumerable<Employee> GenerateRandomEmployees(int count)
     {
-        foreach (string s in GenerateRandomStrings(count, 6))
+        foreach (string s in _helper.GenerateRandomStrings(count, 6))
         {
             Employee employee = new()
             {
                 EmployeeID = 0,
                 LastName = s.ToUpper(),
                 FirstName = s,
-                BirthDate = DateTime.Now
+                BirthDate = DateTime.Today,//constraint <getdate()
             };
-            yield return employee; ;
+            yield return employee; 
         }
     }
 
     private IEnumerable<EmployeeM> GenerateRandomEmployeesM(int count)
     {
-        foreach (string s in GenerateRandomStrings(count, 6))
+        foreach (string s in _helper.GenerateRandomStrings(count, 6))
         {
             EmployeeM employee = new()
             {
                 EmployeeID = 0,
                 Surname = s.ToUpper(),
                 FirstName = s,
-                BirthDate = DateTime.Now
+                BirthDate = DateTime.Today,//constraint <getdate()
             };
             yield return employee; ;
-        }
-    }
-    private IEnumerable<string> GenerateRandomStrings(int count, int length)
-    {
-        var startPos = (int)'a';
-        for (int n = 0; n < count; n++)
-        {
-            var array = new char[length];
-            for (int i = 0; i < length; i++)
-            {
-                int r = random.Next(startPos, startPos + 26);
-                //a random mix of uppercase and lowercase letters
-                array[i] = r % 2 == 0 ? (char)r : char.ToUpper((char)r);
-            }
-            yield return new string(array);
-
         }
     }
 

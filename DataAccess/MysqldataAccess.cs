@@ -47,15 +47,16 @@ public class MysqldataAccess : IDataAccess
     }
 
     public async Task BulkInsertAsync<T>(
-  string table,
+ 
   IEnumerable<T> items,
   Dictionary<string, string>? mappingDic = null,
-  string? connectionId = null
+  string? connectionId = null,
+   string? table=null
   )
     {
         connectionId ??= mySqlConnectionId;
         using IDbConnection connection = new SqlConnection(_config.GetConnectionString(connectionId));
-        await connection.BulkInsertAsync(table, items, mappingDic!);
+        await connection.BulkInsertAsync(items, mappingDic!,table);
 
     }
 

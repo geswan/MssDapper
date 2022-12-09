@@ -79,7 +79,7 @@ public class MssDataAccessSql : IDataAccess
           string sql,
           Func<T, S, T> mappingFunc,
          string? connectionId = null,
-         string splitOn = "Id",//dapper converts this to  uppercase so ID is accepted
+         string splitOn = "Id",//dapper converts this to  uppercase, so ID,id is accepted
         CommandType? commandType = null)
     {
         connectionId ??= msConnectionId;
@@ -101,18 +101,18 @@ public class MssDataAccessSql : IDataAccess
         await connection.ExecuteAsync(sql, parameters, commandType: commandType);
 
     }
- 
+
 
     public async Task BulkInsertAsync<T>(
-      string table,
-      IEnumerable<T> items,
-      Dictionary<string, string>? mappingDic = null,
-      string? connectionId = null
+     IEnumerable<T> items,
+  Dictionary<string, string>? mappingDic = null,
+  string? connectionId = null,
+   string? table = null
       )
     {
         connectionId ??= msConnectionId;
         using IDbConnection connection = new SqlConnection(_config.GetConnectionString(connectionId));
-        await connection.BulkInsertAsync(table, items, mappingDic!);
+        await connection.BulkInsertAsync(items, mappingDic!,table);
 
     }
 

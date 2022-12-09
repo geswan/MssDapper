@@ -13,7 +13,7 @@ namespace DataAccess
         Task<T> QuerySingleAsync<T>(string sql, object? parameters , string? connectionId=null  , CommandType? commandType=null );
         Task<T> QueryFirstOrDefaultAsync<T>(string sql, object? parameters , string? connectionId=null  , CommandType? commandType=null );
         Task<dynamic> QueryAsyncDynamic(string sql, object? parameters, string? connectionId=null  , CommandType? commandType = null );
-        Task BulkInsertAsync<T>(string table, IEnumerable<T> items, Dictionary<string, string>? mappingDic = null, string? connectionId = null);
+        Task BulkInsertAsync<T>(IEnumerable<T> items, Dictionary<string, string>? mappingDic = null, string? connectionId = null, string? table=null );
     }
 
 }
