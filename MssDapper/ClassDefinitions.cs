@@ -1,19 +1,15 @@
 ﻿namespace MssDapper;
-//public class Product
-//{
-//    public int ProductId { get; set; }
-//    public string ProductName { get; set; }
-  
-//    public Category Category { get; set; }
-//}
-//public class Category
-//{
-//    public int CategoryId { get; set; }
-//    public string CategoryName { get; set; }
-   
-//    //public ICollection<Product> Products { get; set; }
-//}
 
+public class Summary
+{
+    public int OrderID { get; set; }
+    public float Subtotal { get; set; }
+
+    public override string ToString()
+    {
+        return string.Format("    {0,-10:G}{1,12:C2}", OrderID, Subtotal);
+    }
+}
 
 
 public class Order
@@ -61,27 +57,5 @@ public class EmployeeM
     }
 }
 
-//public class EmployeeOrder : Order
-//{
-//    public string LastName { get; set; }
-//    public string FirstName { get; set; }
-
-
-//}
-
-//public class EmployeeOrderA : Order
-//{
-//    public Employee Employee { get; set; }
-//}
-//public class OrderA
-//{
-//    public int OrderID { get; set; }
-//    public string CustomerID { get; set; }//gotcha, assumed it was an int
-//    public int EmployeeID { get; set; }
-//    public DateTime OrderDate { get; set; }
-//    public int ShipperID { get; set; }
-
-//    public Employee Employee { get; set; }
-//}
 
 

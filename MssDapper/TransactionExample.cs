@@ -24,7 +24,7 @@ namespace MssDapper
                 BirthDate = new DateTime(2021, 12, 01)
             };
             string connectionId = _dba.GetConnectionId();
-            string sql = connectionId == "MySql" ? _spIds.InsertEmployeeMySQL : _spIds.InsertEmployeeMssSQL;
+            string sql = connectionId == "MySql" ? _spIds.InsertEmployeeMySQL : _spIds.InsertEmployeeTSQL;
 
             var idMicroA = await _dba.QuerySingleAsync<int>(sql, employee);
             var idMicroB = await _dba.QuerySingleAsync<int>(sql, employee);
@@ -56,7 +56,9 @@ namespace MssDapper
             }
             catch (Exception ex)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"The transaction failed. {ex.Message}");
+                Console.ResetColor();
             }
 
         }

@@ -6,6 +6,7 @@ namespace MssDapper
     public class Helper
     {
         private IDataAccess _dba;
+        private Random random = new Random();
         public Helper(IDataAccess dba)
         {
             _dba = dba;

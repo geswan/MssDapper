@@ -122,5 +122,14 @@ namespace MssDapper.Properties {
                 return ResourceManager.GetString("item7", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 8. Bulk Insert With Mapping 5 Records.
+        /// </summary>
+        public static string item8 {
+            get {
+                return ResourceManager.GetString("item8", resourceCulture);
+            }
+        }
     }
 }

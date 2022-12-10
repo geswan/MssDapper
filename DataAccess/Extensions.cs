@@ -50,8 +50,8 @@ namespace DataAccess
             await connection.ExecuteAsync(sql, new DynamicParameters(paramDic));
 
         }
-
-        private  static string  BuildSqlInsert(
+        //https://www.codeproject.com/Articles/5275840/Dynamic-Query-Builder-for-Dapper
+        private static string  BuildSqlInsert(
       string tableName,
       Dictionary<string, object> paramDic,
       IEnumerable<string> colNames
@@ -64,7 +64,7 @@ namespace DataAccess
             {
                 string s = n % columnsPerRow == 0 ? $"),(@p{n}" : $",@p{n}";
                 //builds the values in this form: (@p0,@p1,@p2),(@p3,@p4,@p5),....
-                //each row is surrounded by round brackets and the column-related parameters are comma separated
+                //each row is surrounded by parentheses and the column-related parameters are comma separated
                 sb.Append(s);
             }
             sb.Append(')');

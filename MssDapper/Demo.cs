@@ -36,11 +36,13 @@ public class Demo
         Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine(_rm.GetString("item6"));
         Console.WriteLine(_rm.GetString("item7"));
+        Console.WriteLine(_rm.GetString("item8"));
         Console.ResetColor();
-        Console.WriteLine("8. Exit");
-        Console.Write("\r\nSelect an option:1-8 ");
-        string choice = Console.ReadLine();
+        Console.WriteLine("9. Exit");
+        Console.Write("\r\nSelect an option:1-9 ");
+        string? choice = Console.ReadLine();
         Console.Clear();
+        choice??=string.Empty;
         return await RunDemo(choice);
 
     }
@@ -48,14 +50,15 @@ public class Demo
     {
         return choice switch
         {
-            "1" => await _examples.BulkInsertAsync(),//SubtotalGroupByAsync(),
+            "1" => await _examples.SubtotalGroupByAsync(),
             "2" => await _examples.GroupByACollectionOfParamsAsync(),
             "3" => await _examples.QueryReturningDynamicType(),
             "4" => await _examples.Map2TablesTo1OrdersAAsync(),
             "5" => await _examples.StoredProcedureCustomerOrderHistoryAsync(),
             "6" => await _examples.InsertEmployeeInstanceAAsync(),
             "7" => await _transactionExample.TransactionAsync(),
-            "8" => false,
+            "8" => await _examples.BulkInsertAsyncMap(),
+            "9" => false,
             _ => true,
         }; 
     }

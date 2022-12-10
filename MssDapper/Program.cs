@@ -11,7 +11,7 @@ using System.Text;
 var host = CreateDefaultBuilder().Build();
 using IServiceScope serviceScope = host.Services.CreateScope();
 IServiceProvider svProvider = serviceScope.ServiceProvider;//use container for this scope
-//use dependency injection rather than GetService
+//use dependency injection where possible rather than GetService
 var loggerFactory = svProvider.GetService<ILoggerFactory>();
 var logger = loggerFactory.CreateLogger<Program>();
 logger.LogInformation("built host");
@@ -24,13 +24,15 @@ static IHostBuilder CreateDefaultBuilder()
 {
     return Host.CreateDefaultBuilder()
         .ConfigureAppConfiguration(app =>
-        {
-            app.AddJsonFile("appsettings.json");//set file to always copy to exe location
+        {//set appsettings property to always copy to exe location
+            app.AddJsonFile("appsettings.json");
         })
         .ConfigureServices(services =>
         {
             services.AddTransient<StringBuilder>();
+            //use this for microsoft Sql server
            services.AddSingleton<IDataAccess,MssDataAccessSql>();
+            //use this for MySql and MariaDB
            // services.AddSingleton<IDataAccess, MysqldataAccess>();
             services.AddTransient<SpExampleIds>();
             services.AddTransient<Helper>();

@@ -8,7 +8,7 @@ public class SpExampleIds
     public string InsertEmployeeMySQL { get; } = @"insert into Employees(LastName,FirstName,BirthDate)
                        values(@LastName,@FirstName,@BirthDate);
                        SELECT LAST_INSERT_ID();";
-    public string InsertEmployeeMssSQL { get; } = @"insert into Employees(LastName,FirstName,BirthDate)
+    public string InsertEmployeeTSQL { get; } = @"insert into Employees(LastName,FirstName,BirthDate)
                        values(@LastName,@FirstName,@BirthDate);
                        SELECT @@IDENTITY; ";
 

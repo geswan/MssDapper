@@ -11,7 +11,8 @@ public class Examples
     private readonly SpExampleIds _spIds;
     private ILogger _logger;
     private Helper _helper;
-    private Random random = new Random();
+    private int recordsToInsert = 5;
+   
 
     public Examples(IDataAccess dba, ILoggerFactory loggerFactory, SpExampleIds spIds, Helper helper)
     {
@@ -23,11 +24,17 @@ public class Examples
     }
     public async Task<bool> SubtotalGroupByAsync()
     {
-
-        string sql = @"SELECT `Order Details`.OrderID, 
-        Sum((`Order Details`.UnitPrice*Quantity*(1-Discount)/100)*100) AS Subtotal
+        string mySql = @"SELECT `Order Details`.OrderID, 
+        Sum(`Order Details`.UnitPrice*Quantity*(1-Discount)) AS Subtotal
         FROM `Order Details`
         GROUP BY `Order Details`.OrderID;";
+
+        string tSql = @"SELECT [Order Details].OrderID, 
+        Sum([Order Details].UnitPrice*Quantity*(1-Discount)) AS Subtotal
+        FROM [Order Details]
+        GROUP BY [Order Details].OrderID;";
+        var connectionId=_dba.GetConnectionId();
+        string sql = connectionId=="MySql"?mySql:tSql;
         var summaries = await _dba.QueryAsync<Summary>(sql, null);
         Console.WriteLine(_helper.Format2ColsWide, "OrderID", "Subtotal");
         int count = 0;
@@ -40,13 +47,13 @@ public class Examples
         return _helper.PressReturnToContinue(count);
 
     }
-  // change this example
+ 
     public async Task<bool> QueryReturningDynamicType()
     {
         var sql = "select City, Region,ContactName from suppliers where Country='USA'";
         dynamic suppliers = await _dba.QueryAsyncDynamic(sql, null);
         Console.WriteLine(_helper.Format3ColsWide, "City", "Region", "ContactName");
-        foreach (var supplier in suppliers)//fastest way
+        foreach (var supplier in suppliers)
         {
             Console.WriteLine(_helper.Format3ColsWide,supplier.City,supplier.Region,supplier.ContactName);
         }
@@ -54,12 +61,12 @@ public class Examples
         return _helper.PressReturnToContinue();
     }
 
-    //https://www.codeproject.com/Articles/5275840/Dynamic-Query-Builder-for-Dapper
+   
 
     public async Task<bool> BulkInsertAsyncMap()
     {
-        int recordsToInsert = 5;
-        var employees = GenerateRandomEmployeesM(recordsToInsert);//Surname needs mapping
+        var employees = GenerateRandomEmployeesM(recordsToInsert);
+        //Surname needs mapping Surname=>LastName
         Dictionary<string,string>mappingDic= new() { { "Surname", "LastName" } };
      await   _dba.BulkInsertAsync(employees,mappingDic,table:"Employees");
         Console.WriteLine($"{recordsToInsert} Records Inserted");
@@ -68,7 +75,6 @@ public class Examples
 
     public async Task<bool> BulkInsertAsync()
     {
-        int recordsToInsert = 5;
         var employees = GenerateRandomEmployees(recordsToInsert);
          await _dba.BulkInsertAsync(employees);
         Console.WriteLine($"{recordsToInsert} Records Inserted");
@@ -203,7 +209,7 @@ public class Examples
             BirthDate = new DateTime(1928, 01, 01)
         };
         string connectionId = _dba.GetConnectionId();
-        string sql = connectionId == "MySql" ? _spIds.InsertEmployeeMySQL : _spIds.InsertEmployeeMssSQL;
+        string sql = connectionId == "MySql" ? _spIds.InsertEmployeeMySQL : _spIds.InsertEmployeeTSQL;
         var id = await _dba.QuerySingleAsync<int>(sql, employee);
         var foundEmployee = await _helper.GetFirstOrDefaultEmployeeAsync(id);
         Console.WriteLine($"The inserted record is {foundEmployee}");

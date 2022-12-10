@@ -138,4 +138,7 @@
   <data name="item7" xml:space="preserve">
     <value>7. Transaction Example.</value>
   </data>
+  <data name="item8" xml:space="preserve">
+    <value>8. Bulk Insert With Mapping 5 Records</value>
+  </data>
 </root>
