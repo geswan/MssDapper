@@ -29,16 +29,24 @@ static IHostBuilder CreateDefaultBuilder()
         })
         .ConfigureServices(services =>
         {
-            services.AddTransient<StringBuilder>();
+            //services.AddTransient<StringBuilder>();
             //use this for microsoft Sql server
-           services.AddSingleton<IDataAccess,MssDataAccessSql>();
+            //services.AddSingleton<IDataAccess,MssDataAccessSql>();
+            // //use this for MySql and MariaDB
+            //// services.AddSingleton<IDataAccess, MysqldataAccess>();
+            // services.AddTransient<SpExampleIds>();
+            // services.AddTransient<Helper>();
+            // services.AddTransient<Examples>();
+            // services.AddTransient<TransactionExample>();
+            // services.AddTransient<Demo>();
+            services.AddScoped<IDataAccess, MssDataAccessSql>();
             //use this for MySql and MariaDB
-           // services.AddSingleton<IDataAccess, MysqldataAccess>();
-            services.AddTransient<SpExampleIds>();
-            services.AddTransient<Helper>();
-            services.AddTransient<Examples>();
-            services.AddTransient<TransactionExample>();
-            services.AddTransient<Demo>();
+            // services.AddScoped<IDataAccess, MysqldataAccess>();
+            services.AddScoped<SpExampleIds>();
+            services.AddScoped<Helper>();
+            services.AddScoped<Examples>();
+            services.AddScoped<TransactionExample>();
+            services.AddScoped<Demo>();
             services.AddLogging(builder =>
             {
                 builder.ClearProviders();

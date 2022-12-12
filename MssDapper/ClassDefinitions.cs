@@ -15,18 +15,21 @@ public class Summary
 public class Order
 {
     public int OrderID { get; set; }
-    public string CustomerID { get; set; }//gotcha, assumed it was an int
+    public string? CustomerID { get; set; }//gotcha, assumed it was an int
     public int EmployeeID { get; set; }
     public DateTime OrderDate { get; set; }
     public int ShipperID { get; set; }
-    public Employee Employee { get; set; }
+    public Employee? Employee { get; set; }
 }
 
 public class Employee
 {
     public int EmployeeID { get; set; }
-    public string LastName { get; set; }
-    public string FirstName { get; set; }
+
+    public string? LastName { get; set; }
+
+    public string? FirstName { get; set; }
+
     public DateTime BirthDate { get; set; }
 
     public override string ToString()
@@ -39,12 +42,12 @@ public class Employee
     }
 }
 
-
+//used to demo mapping Surname to LastName
 public class EmployeeM
 {
     public int EmployeeID { get; set; }
-    public string Surname { get; set; }
-    public string FirstName { get; set; }
+    public string? Surname { get; set; }
+    public string? FirstName { get; set; }
     public DateTime BirthDate { get; set; }
 
     public override string ToString()

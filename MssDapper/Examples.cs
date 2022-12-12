@@ -35,7 +35,7 @@ public class Examples
         GROUP BY [Order Details].OrderID;";
         var connectionId=_dba.GetConnectionId();
         string sql = connectionId=="MySql"?mySql:tSql;
-        var summaries = await _dba.QueryAsync<Summary>(sql, null);
+        var summaries = await _dba.QueryAsync<Summary>(sql);
         Console.WriteLine(_helper.Format2ColsWide, "OrderID", "Subtotal");
         int count = 0;
         foreach (var summary in summaries)
@@ -51,7 +51,7 @@ public class Examples
     public async Task<bool> QueryReturningDynamicType()
     {
         var sql = "select City, Region,ContactName from suppliers where Country='USA'";
-        dynamic suppliers = await _dba.QueryAsyncDynamic(sql, null);
+        dynamic suppliers = await _dba.QueryAsyncDynamic(sql);
         Console.WriteLine(_helper.Format3ColsWide, "City", "Region", "ContactName");
         foreach (var supplier in suppliers)
         {
@@ -159,7 +159,7 @@ public class Examples
              FROM Products
              order by Products.UnitPrice desc
              LIMIT 10";
-        var results = await _dba.QueryAsync<(string product, float price)>(sql, null);
+        var results = await _dba.QueryAsync<(string product, float price)>(sql);
         Console.WriteLine("The 10 Most Expensive Products");
         Console.WriteLine(_helper.Format2ColsWide, "Product", "Price");
         foreach ((string product, float price) in results)
