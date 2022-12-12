@@ -1,25 +1,30 @@
 ﻿using Dapper;
 using DataAccess;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System.Configuration;
 using System.Data;
 
 namespace MssDapper;
 
 public class Examples
 {
-    private IDataAccess _dba;
+    private readonly IDataAccess _dba;
     private readonly SpExampleIds _spIds;
-    private ILogger _logger;
-    private Helper _helper;
-    private int recordsToInsert = 5;
-   
+    private readonly Helper _helper;
+    private readonly int recordsToInsert = 5;
+    private readonly ServerOptions _serverOptions;
+    private readonly IConfiguration _config;
 
-    public Examples(IDataAccess dba, ILoggerFactory loggerFactory, SpExampleIds spIds, Helper helper)
+
+
+    public Examples(IDataAccess dba, IOptionsSnapshot<ServerOptions> serverOptionsSnapshot, SpExampleIds spIds, Helper helper)
     {
-        _logger = loggerFactory.CreateLogger<Examples>();
         _dba = dba;
         _spIds = spIds;
         _helper = helper;
+        _serverOptions= serverOptionsSnapshot.Value;
 
     }
     public async Task<bool> SubtotalGroupByAsync()
@@ -33,8 +38,8 @@ public class Examples
         Sum([Order Details].UnitPrice*Quantity*(1-Discount)) AS Subtotal
         FROM [Order Details]
         GROUP BY [Order Details].OrderID;";
-        var connectionId=_dba.GetConnectionId();
-        string sql = connectionId=="MySql"?mySql:tSql;
+        var connectionId=_dba.ConnectionId;
+        string sql = connectionId==_serverOptions.MySqlServer?mySql:tSql;
         var summaries = await _dba.QueryAsync<Summary>(sql);
         Console.WriteLine(_helper.Format2ColsWide, "OrderID", "Subtotal");
         int count = 0;
@@ -133,10 +138,10 @@ public class Examples
 
     public async Task<bool> StoredProcedureCustomerOrderHistoryAsync()
     {
-        string connectionId = _dba.GetConnectionId();
+        string connectionId = _dba.ConnectionId;
         (string paramName, object value) param;
         string customerID = "ANTON";//input param
-        param = connectionId == "MsSql" ? ("@CustomerID", customerID) : ("AtCustomerID", customerID);
+        param = connectionId == _serverOptions.SqlServer ? ("@CustomerID", customerID) : ("AtCustomerID", customerID);
         var paramDic = new Dictionary<string, object>
         {
            { param.paramName, param.value }
@@ -208,7 +213,7 @@ public class Examples
             LastName = "Mouse",
             BirthDate = new DateTime(1928, 01, 01)
         };
-        string connectionId = _dba.GetConnectionId();
+        string connectionId = _dba.ConnectionId;
         string sql = connectionId == "MySql" ? _spIds.InsertEmployeeMySQL : _spIds.InsertEmployeeTSQL;
         var id = await _dba.QuerySingleAsync<int>(sql, employee);
         var foundEmployee = await _helper.GetFirstOrDefaultEmployeeAsync(id);

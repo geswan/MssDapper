@@ -1,14 +1,9 @@
-﻿
-using DataAccess;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MssDapper;
 
-using System.Text;
-
-var host = CreateDefaultBuilder().Build();
+var host = CreateApplicationBuilder().Build();
 using IServiceScope serviceScope = host.Services.CreateScope();
 IServiceProvider svProvider = serviceScope.ServiceProvider;//use container for this scope
 //use dependency injection where possible rather than GetService
@@ -20,38 +15,10 @@ var demo = svProvider.GetService<Demo>();
 Console.WriteLine();
 
 
-static IHostBuilder CreateDefaultBuilder()
+static HostApplicationBuilder CreateApplicationBuilder()
 {
-    return Host.CreateDefaultBuilder()
-        .ConfigureAppConfiguration(app =>
-        {//set appsettings property to always copy to exe location
-            app.AddJsonFile("appsettings.json");
-        })
-        .ConfigureServices(services =>
-        {
-            //services.AddTransient<StringBuilder>();
-            //use this for microsoft Sql server
-            //services.AddSingleton<IDataAccess,MssDataAccessSql>();
-            // //use this for MySql and MariaDB
-            //// services.AddSingleton<IDataAccess, MysqldataAccess>();
-            // services.AddTransient<SpExampleIds>();
-            // services.AddTransient<Helper>();
-            // services.AddTransient<Examples>();
-            // services.AddTransient<TransactionExample>();
-            // services.AddTransient<Demo>();
-            services.AddScoped<IDataAccess, MssDataAccessSql>();
-            //use this for MySql and MariaDB
-            // services.AddScoped<IDataAccess, MysqldataAccess>();
-            services.AddScoped<SpExampleIds>();
-            services.AddScoped<Helper>();
-            services.AddScoped<Examples>();
-            services.AddScoped<TransactionExample>();
-            services.AddScoped<Demo>();
-            services.AddLogging(builder =>
-            {
-                builder.ClearProviders();
-                //  builder.AddConsole();
-                builder.AddDebug();//output path is View/Output/Debug
-            });
-        });
+    var builder = Host.CreateApplicationBuilder();
+    var startup = new Startup(builder.Configuration);
+    startup.ConfigureServices(builder.Services);
+    return builder;
 }

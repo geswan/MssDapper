@@ -1,4 +1,6 @@
 ﻿using DataAccess;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace MssDapper
 {
@@ -7,11 +9,14 @@ namespace MssDapper
         private IDataAccess _dba;
         private readonly SpExampleIds _spIds;
         private Helper _helper;
-        public TransactionExample(IDataAccess dba, SpExampleIds spIds, Helper helper)
+        private readonly ServerOptions _serverOptions;
+       // private readonly IConfiguration _config;
+        public TransactionExample(IDataAccess dba, IOptionsSnapshot<ServerOptions> serverOptionsSnapshot,SpExampleIds spIds, Helper helper)
         {
             _dba = dba;
             _spIds = spIds;
             _helper = helper;
+            _serverOptions= serverOptionsSnapshot.Value;
         }
        
         public async Task<bool> TransactionAsync()
@@ -23,8 +28,8 @@ namespace MssDapper
                 LastName = "Mouse",
                 BirthDate = new DateTime(2021, 12, 01)
             };
-            string connectionId = _dba.GetConnectionId();
-            string sql = connectionId == "MySql" ? _spIds.InsertEmployeeMySQL : _spIds.InsertEmployeeTSQL;
+            string connectionId = _dba.ConnectionId;
+            string sql = connectionId == _serverOptions.MySqlServer ? _spIds.InsertEmployeeMySQL : _spIds.InsertEmployeeTSQL;
 
             var idMicroA = await _dba.QuerySingleAsync<int>(sql, employee);
             var idMicroB = await _dba.QuerySingleAsync<int>(sql, employee);

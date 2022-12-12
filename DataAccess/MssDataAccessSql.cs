@@ -1,7 +1,5 @@
 ﻿using Dapper;
-using Microsoft.Extensions.Configuration;
 using System.Data;
-using System.Data.SqlClient;
 using System.Runtime.ExceptionServices;
 using System.Transactions;
 
@@ -10,22 +8,21 @@ namespace DataAccess;
 
 public class MssDataAccessSql : IDataAccess
 {
-    private readonly IConfiguration _config;
-    private const string msConnectionId = "MsSql";//must be a const
-    public MssDataAccessSql(IConfiguration config)
+    private readonly IDatabaseContext _databaseContext;
+    private  string _msConnectionId;
+    public MssDataAccessSql(IDatabaseContext databaseContext)
     {
-        _config = config;
+        _databaseContext=databaseContext;
+        _msConnectionId = _databaseContext.ConnectionID;
     }
 
-    public string GetConnectionId() => msConnectionId;
+    public string ConnectionId => _msConnectionId;
     public async Task<IEnumerable<T>> QueryAsync<T>(
         string sql,
         object? parameters = null,
-        string? connectionId = null,
         CommandType? commandType = null)
     {
-        connectionId ??= msConnectionId;
-        using IDbConnection connection = new SqlConnection(_config.GetConnectionString(connectionId));
+        using IDbConnection connection = _databaseContext.GetConnection();
         var result = await connection.QueryAsync<T>(sql, parameters,
             commandType: commandType);
 
@@ -35,11 +32,9 @@ public class MssDataAccessSql : IDataAccess
     public async Task<T> QuerySingleAsync<T>(
        string sql,
        object? parameters = null,
-       string? connectionId = null,
        CommandType? commandType = null)
     {
-        connectionId ??= msConnectionId;
-        using IDbConnection connection = new SqlConnection(_config.GetConnectionString(connectionId));
+        using IDbConnection connection = _databaseContext.GetConnection();
         var result = await connection.QuerySingleAsync<T>(sql, parameters,
             commandType: commandType);
 
@@ -49,13 +44,11 @@ public class MssDataAccessSql : IDataAccess
     public async Task<dynamic> QueryAsyncDynamic(
       string sql,
      object? parameters,
-     string? connectionId = null,
     CommandType? commandType = null)
     {
-        connectionId ??= msConnectionId;
-        using IDbConnection cnn = new SqlConnection(_config.GetConnectionString(connectionId));
+        using IDbConnection connection = _databaseContext.GetConnection();
 
-        var result = await cnn.QueryAsync<dynamic>(sql, parameters, commandType: commandType);
+        var result = await connection.QueryAsync<dynamic>(sql, parameters, commandType: commandType);
 
         return result;
 
@@ -64,11 +57,9 @@ public class MssDataAccessSql : IDataAccess
     public async Task<T> QueryFirstOrDefaultAsync<T>(
        string sql,
        object? parameters = null,
-       string? connectionId = null,
        CommandType? commandType = null)
     {
-        connectionId ??= msConnectionId;
-        using IDbConnection connection = new SqlConnection(_config.GetConnectionString(connectionId));
+        using IDbConnection connection = _databaseContext.GetConnection();
         var result = await connection.QueryFirstOrDefaultAsync<T>(sql, parameters,
          commandType: commandType);
         return result;
@@ -78,12 +69,10 @@ public class MssDataAccessSql : IDataAccess
     public async Task<IEnumerable<T>> QueryAsync<T, S>(
           string sql,
           Func<T, S, T> mappingFunc,
-         string? connectionId = null,
          string splitOn = "Id",//dapper converts this to  uppercase, so ID,id is accepted
         CommandType? commandType = null)
     {
-        connectionId ??= msConnectionId;
-        using IDbConnection connection = new SqlConnection(_config.GetConnectionString(connectionId));
+        using IDbConnection connection = _databaseContext.GetConnection();
 
         var results = await connection.QueryAsync(sql, mappingFunc, splitOn: splitOn, commandType: commandType);
 
@@ -93,11 +82,9 @@ public class MssDataAccessSql : IDataAccess
     public async Task ExecuteAsync(
         string sql,
         object parameters,
-        string? connectionId = null,
         CommandType? commandType = null)
     {
-        connectionId ??= msConnectionId;
-        using IDbConnection connection = new SqlConnection(_config.GetConnectionString(connectionId));
+        using IDbConnection connection = _databaseContext.GetConnection(); ;
         await connection.ExecuteAsync(sql, parameters, commandType: commandType);
 
     }
@@ -106,12 +93,10 @@ public class MssDataAccessSql : IDataAccess
     public async Task BulkInsertAsync<T>(
      IEnumerable<T> items,
   Dictionary<string, string>? mappingDic = null,
-  string? connectionId = null,
    string? table = null
       )
     {
-        connectionId ??= msConnectionId;
-        using IDbConnection connection = new SqlConnection(_config.GetConnectionString(connectionId));
+        using IDbConnection connection = _databaseContext.GetConnection();
         await connection.BulkInsertAsync(items, mappingDic!,table);
 
     }
@@ -121,11 +106,9 @@ public class MssDataAccessSql : IDataAccess
       object parametersA,
        string sqlB,
       object parametersB,
-      string? connectionId = null,
       CommandType? commandType = null)
     {
-        connectionId ??= msConnectionId;
-        using IDbConnection connection = new SqlConnection(_config.GetConnectionString(connectionId));
+        using IDbConnection connection = _databaseContext.GetConnection();
         using var transScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
         connection.Open();
 
