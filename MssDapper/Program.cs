@@ -3,14 +3,14 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MssDapper;
 
-var host = CreateApplicationBuilder().Build();
-using IServiceScope serviceScope = host.Services.CreateScope();
-IServiceProvider svProvider = serviceScope.ServiceProvider;//use container for this scope
-//use dependency injection where possible rather than GetService
-var loggerFactory = svProvider.GetService<ILoggerFactory>();
-var logger = loggerFactory.CreateLogger<Program>();
-logger.LogInformation("built host");
-var demo = svProvider.GetService<Demo>();
+var builder = CreateApplicationBuilder();
+builder.Logging.ClearProviders();
+//builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+var app= builder.Build();
+var logger=app.Services.GetService<ILogger<Program>>();
+logger?.LogInformation("built app");
+var demo = app.Services.GetService<Demo>();
  await demo.Run();
 Console.WriteLine();
 

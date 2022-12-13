@@ -1,47 +1,45 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Options;
 using MySqlConnector;
 using System.Data;
 using System.Data.SqlClient;
 
-namespace DataAccess
+namespace DataAccess;
+
+public class SqlServerContext : IDatabaseContext
 {
-    public class SqlServerContext : IDatabaseContext
+    private readonly ServerOptions _serverOptions;
+    private readonly string _connectionString;
+    public bool IsSqlServer { get; } = true;
+  
+    public SqlServerContext(IOptionsSnapshot<ServerOptions> serverOptionsSnapshot)
     {
-        private readonly IConfiguration _config;
-        private const string _msConnectionId = "MsSql";
 
-        public string ConnectionID
-        {
-            get { return _msConnectionId; }
-        }
-        public SqlServerContext(IConfiguration config)
-        {
-            _config = config;
-        }
-        public IDbConnection GetConnection(string? connectionId = null)
-        {
-            connectionId ??= _msConnectionId;
-            return new SqlConnection(_config.GetConnectionString(connectionId));
-        }
+        _serverOptions = serverOptionsSnapshot.Value;
+        _connectionString = _serverOptions.MsSql;
     }
-
-    public class MySqlServerContext : IDatabaseContext
+    public IDbConnection GetConnection()
     {
-        private readonly IConfiguration _config;
-        private const string mySqlConnectionId = "MySql";
 
-        public string ConnectionID
-        {
-            get { return mySqlConnectionId; }
-        }
-        public MySqlServerContext(IConfiguration config)
-        {
-            _config = config;
-        }
-        public IDbConnection GetConnection(string? connectionId = null)
-        {
-            connectionId ??= mySqlConnectionId;
-            return new MySqlConnection(_config.GetConnectionString(connectionId));
-        }
+        return new SqlConnection(_connectionString);
     }
+}
+
+public class MySqlServerContext : IDatabaseContext
+{
+  
+    private readonly ServerOptions _serverOptions;
+    private readonly string _connectionString;
+    public bool IsSqlServer { get; } = false;
+    public MySqlServerContext(IOptionsSnapshot<ServerOptions> serverOptionsSnapshot)
+    {
+      
+        _serverOptions = serverOptionsSnapshot.Value;
+        _connectionString = _serverOptions.MySql;
+    }
+    public IDbConnection GetConnection()
+    {
+       
+        return new MySqlConnection(_connectionString);
+    }
+  
 }

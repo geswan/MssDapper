@@ -7,21 +7,19 @@ namespace MssDapper
 {
     public class Startup
     {
-        public IConfiguration Config
-        {
-            get;
-        }
+        private IConfiguration _config;
+       
         public Startup(IConfiguration configuration)
         {
-            Config = configuration;
+            _config = configuration;
         }
 
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddScoped<IDataAccess, MssDataAccessSql>();
-            // services.AddScoped<IDatabaseContext, SqlServerContext>();
+            // services.AddTransient<IDatabaseContext, SqlServerContext>();
             //use this for MySql and MariaDB
-            services.AddScoped<IDatabaseContext, MySqlServerContext>();
+            services.AddTransient<IDatabaseContext, MySqlServerContext>();
             services.AddScoped<SpExampleIds>();
             services.AddScoped<Helper>();
             services.AddScoped<Examples>();
@@ -33,7 +31,7 @@ namespace MssDapper
                 loggingBuilder.AddDebug();//output path is View/Output/Debug
             });
             services.AddScoped<Demo>();
-            services.Configure<ServerOptions>(Config.GetSection(ServerOptions.Servers));
+            services.Configure<ServerOptions>(_config.GetSection(ServerOptions.ConnectionStrings));
           
         }
     }

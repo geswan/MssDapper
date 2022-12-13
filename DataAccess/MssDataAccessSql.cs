@@ -9,19 +9,20 @@ namespace DataAccess;
 public class MssDataAccessSql : IDataAccess
 {
     private readonly IDatabaseContext _databaseContext;
-    private  string _msConnectionId;
+ 
     public MssDataAccessSql(IDatabaseContext databaseContext)
     {
         _databaseContext=databaseContext;
-        _msConnectionId = _databaseContext.ConnectionID;
+       IsSqlServer= _databaseContext.IsSqlServer;
     }
 
-    public string ConnectionId => _msConnectionId;
+    public bool IsSqlServer {get; }
     public async Task<IEnumerable<T>> QueryAsync<T>(
         string sql,
         object? parameters = null,
         CommandType? commandType = null)
     {
+        //error here
         using IDbConnection connection = _databaseContext.GetConnection();
         var result = await connection.QueryAsync<T>(sql, parameters,
             commandType: commandType);

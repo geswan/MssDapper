@@ -5,7 +5,7 @@ namespace DataAccess
 {
     public interface IDataAccess
     {
-        string ConnectionId { get; }
+        bool IsSqlServer{ get; }
         Task ExecuteTransactionAsync(string sqlA, object parametersA, string sqlB, object parametersB, CommandType? commandType=null );
         Task ExecuteAsync(string sql, object parameters,  CommandType? commandType=null );
         Task<IEnumerable<T>> QueryAsync<T, S>(string sql, Func<T, S, T> mappingFunc,  string splitOn = "Id", CommandType? commandType=null );

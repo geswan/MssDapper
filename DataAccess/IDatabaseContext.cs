@@ -4,7 +4,7 @@ namespace DataAccess
 {
     public interface IDatabaseContext
     {
-        IDbConnection GetConnection(string? connectionId = null);
-        string ConnectionID { get; }
+        IDbConnection GetConnection();
+        bool IsSqlServer { get; }
     }
 }

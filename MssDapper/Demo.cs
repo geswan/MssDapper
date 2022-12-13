@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using Microsoft.Extensions.Logging;
+using System.Reflection;
 using System.Resources;
 
 namespace MssDapper;
@@ -8,11 +9,12 @@ public class Demo
     private TransactionExample _transactionExample;
     private Examples _examples;
     private ResourceManager _rm;
-    public Demo(Examples examples,TransactionExample transactionExample)
+    public Demo(Examples examples,TransactionExample transactionExample, ILogger<Demo> logger)
     {
         _transactionExample=transactionExample;
         _examples = examples;
        _rm = new ResourceManager("MssDapper.Properties.Resources", Assembly.GetExecutingAssembly());
+        logger.LogInformation("Demo loaded");
     }
     public async Task Run()
     {

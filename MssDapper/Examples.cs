@@ -1,9 +1,6 @@
 ﻿using Dapper;
 using DataAccess;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Configuration;
 using System.Data;
 
 namespace MssDapper;
@@ -15,10 +12,7 @@ public class Examples
     private readonly Helper _helper;
     private readonly int recordsToInsert = 5;
     private readonly ServerOptions _serverOptions;
-    private readonly IConfiguration _config;
-
-
-
+  
     public Examples(IDataAccess dba, IOptionsSnapshot<ServerOptions> serverOptionsSnapshot, SpExampleIds spIds, Helper helper)
     {
         _dba = dba;
@@ -38,8 +32,8 @@ public class Examples
         Sum([Order Details].UnitPrice*Quantity*(1-Discount)) AS Subtotal
         FROM [Order Details]
         GROUP BY [Order Details].OrderID;";
-        var connectionId=_dba.ConnectionId;
-        string sql = connectionId==_serverOptions.MySqlServer?mySql:tSql;
+        //var connectionId=_dba.ConnectionId;
+        string sql = _dba.IsSqlServer ? tSql:mySql;
         var summaries = await _dba.QueryAsync<Summary>(sql);
         Console.WriteLine(_helper.Format2ColsWide, "OrderID", "Subtotal");
         int count = 0;
@@ -124,11 +118,11 @@ public class Examples
         Console.WriteLine("Employee Orders ");
         Console.WriteLine(_helper.Format2ColsNarrow, "Employee Name", "Order Date");
         int count = 0;
-        foreach (var emploeeOrderA in employeeOrders)
+        foreach (Order emploeeOrderA in employeeOrders)
         {
             count++;
-            Console.WriteLine(_helper.Format2ColsNarrow, $"{emploeeOrderA.Employee.LastName} {emploeeOrderA.Employee.FirstName}",
-                emploeeOrderA.OrderDate.ToShortDateString());
+            Console.WriteLine(_helper.Format2ColsNarrow, $"{emploeeOrderA?.Employee?.LastName} {emploeeOrderA?.Employee?.FirstName}",
+                emploeeOrderA?.OrderDate.ToShortDateString());
         }
         Console.WriteLine(_helper.Format2ColsNarrow, "Employee Name", "Order Date");
 
@@ -138,10 +132,9 @@ public class Examples
 
     public async Task<bool> StoredProcedureCustomerOrderHistoryAsync()
     {
-        string connectionId = _dba.ConnectionId;
         (string paramName, object value) param;
         string customerID = "ANTON";//input param
-        param = connectionId == _serverOptions.SqlServer ? ("@CustomerID", customerID) : ("AtCustomerID", customerID);
+        param = _dba.IsSqlServer  ? ("@CustomerID", customerID) : ("AtCustomerID", customerID);
         var paramDic = new Dictionary<string, object>
         {
            { param.paramName, param.value }
@@ -213,8 +206,8 @@ public class Examples
             LastName = "Mouse",
             BirthDate = new DateTime(1928, 01, 01)
         };
-        string connectionId = _dba.ConnectionId;
-        string sql = connectionId == "MySql" ? _spIds.InsertEmployeeMySQL : _spIds.InsertEmployeeTSQL;
+      
+        string sql = _dba.IsSqlServer ?  _spIds.InsertEmployeeTSQL: _spIds.InsertEmployeeMySQL;
         var id = await _dba.QuerySingleAsync<int>(sql, employee);
         var foundEmployee = await _helper.GetFirstOrDefaultEmployeeAsync(id);
         Console.WriteLine($"The inserted record is {foundEmployee}");
@@ -244,11 +237,11 @@ public class Examples
         Console.WriteLine("Employee Orders ");
         Console.WriteLine(_helper.Format2ColsNarrow, "Employee Name", "Order Date");
         int count = 0;
-        foreach (var emploeeOrderA in employeeOrdersA)
+        foreach (Order emploeeOrderA in employeeOrdersA)
         {
             count++;
-            Console.WriteLine(_helper.Format2ColsNarrow, $"{emploeeOrderA.Employee.LastName} {emploeeOrderA.Employee.FirstName}",
-                emploeeOrderA.OrderDate.ToShortDateString());
+            Console.WriteLine(_helper.Format2ColsNarrow, $"{emploeeOrderA?.Employee?.LastName} {emploeeOrderA?.Employee?.FirstName}",
+                emploeeOrderA?.OrderDate.ToShortDateString());
         }
         Console.WriteLine(_helper.Format2ColsNarrow, "Employee Name", "Order Date");
 

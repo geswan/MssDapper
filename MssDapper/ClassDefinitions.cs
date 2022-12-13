@@ -59,23 +59,6 @@ public class EmployeeM
         return new { Surname, FirstName, BirthDate };
     }
 }
-public class ServerOptions
-{
-    public const string Servers = "Servers";
-
-    public string SqlServer { get; set; } = string.Empty;
-    public string MySqlServer { get; set; } = string.Empty;
-    public string MariaDbServer { get; set; } = string.Empty;
-}
-
-//public class DbConnectionOptions
-//{
-//    public const string DbConnections = "ConnectionStrings";
-
-//    public string MsSql { get; set; } = string.Empty;
-//    public string MySql { get; set; } = string.Empty;
-//    public string MariaDb { get; set; } = string.Empty;
-//}
 
 
 
