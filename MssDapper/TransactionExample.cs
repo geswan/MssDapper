@@ -15,7 +15,7 @@ namespace MssDapper
             _helper = helper;
       
         }
-       
+        #region Example 7 Transaction Example.
         public async Task<bool> TransactionAsync()
         {
 
@@ -70,6 +70,7 @@ namespace MssDapper
             var microMouseB = await _helper.GetFirstOrDefaultEmployeeAsync(idMicroB);
             return (microMouseA, microMouseB);
         }
+        #endregion
 
     }
 }

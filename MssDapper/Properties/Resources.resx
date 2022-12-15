@@ -124,7 +124,7 @@
     <value>2. Group By Using a collection of input parameters</value>
   </data>
   <data name="item3" xml:space="preserve">
-    <value>3. QueryReturningDynamicType</value>
+    <value>3. Query that returns a Dynamic Type</value>
   </data>
   <data name="item4" xml:space="preserve">
     <value>4. Map from tableA &amp; tableB to ClassA containing a reference to ClassB</value>

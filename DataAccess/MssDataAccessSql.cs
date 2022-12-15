@@ -22,7 +22,7 @@ public class MssDataAccessSql : IDataAccess
         object? parameters = null,
         CommandType? commandType = null)
     {
-        //error here
+      
         using IDbConnection connection = _databaseContext.GetConnection();
         var result = await connection.QueryAsync<T>(sql, parameters,
             commandType: commandType);

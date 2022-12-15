@@ -1,6 +1,5 @@
 ﻿using Dapper;
 using DataAccess;
-using Microsoft.Extensions.Options;
 using System.Data;
 
 namespace MssDapper;
@@ -11,16 +10,14 @@ public class Examples
     private readonly SpExampleIds _spIds;
     private readonly Helper _helper;
     private readonly int recordsToInsert = 5;
-    private readonly ServerOptions _serverOptions;
-  
-    public Examples(IDataAccess dba, IOptionsSnapshot<ServerOptions> serverOptionsSnapshot, SpExampleIds spIds, Helper helper)
+ 
+    public Examples(IDataAccess dba,SpExampleIds spIds, Helper helper)
     {
         _dba = dba;
         _spIds = spIds;
         _helper = helper;
-        _serverOptions= serverOptionsSnapshot.Value;
-
     }
+    #region Example 1 Group By SubTotal
     public async Task<bool> SubtotalGroupByAsync()
     {
         string mySql = @"SELECT `Order Details`.OrderID, 
@@ -32,8 +29,7 @@ public class Examples
         Sum([Order Details].UnitPrice*Quantity*(1-Discount)) AS Subtotal
         FROM [Order Details]
         GROUP BY [Order Details].OrderID;";
-        //var connectionId=_dba.ConnectionId;
-        string sql = _dba.IsSqlServer ? tSql:mySql;
+        string sql = _dba.IsSqlServer ? tSql : mySql;
         var summaries = await _dba.QueryAsync<Summary>(sql);
         Console.WriteLine(_helper.Format2ColsWide, "OrderID", "Subtotal");
         int count = 0;
@@ -46,40 +42,9 @@ public class Examples
         return _helper.PressReturnToContinue(count);
 
     }
- 
-    public async Task<bool> QueryReturningDynamicType()
-    {
-        var sql = "select City, Region,ContactName from suppliers where Country='USA'";
-        dynamic suppliers = await _dba.QueryAsyncDynamic(sql);
-        Console.WriteLine(_helper.Format3ColsWide, "City", "Region", "ContactName");
-        foreach (var supplier in suppliers)
-        {
-            Console.WriteLine(_helper.Format3ColsWide,supplier.City,supplier.Region,supplier.ContactName);
-        }
-        Console.WriteLine(_helper.Format3ColsWide, "City", "Region", "Contact Name");
-        return _helper.PressReturnToContinue();
-    }
+    #endregion
 
-   
-
-    public async Task<bool> BulkInsertAsyncMap()
-    {
-        var employees = GenerateRandomEmployeesM(recordsToInsert);
-        //Surname needs mapping Surname=>LastName
-        Dictionary<string,string>mappingDic= new() { { "Surname", "LastName" } };
-     await   _dba.BulkInsertAsync(employees,mappingDic,table:"Employees");
-        Console.WriteLine($"{recordsToInsert} Records Inserted");
-        return _helper.PressReturnToContinue();
-    }
-
-    public async Task<bool> BulkInsertAsync()
-    {
-        var employees = GenerateRandomEmployees(recordsToInsert);
-         await _dba.BulkInsertAsync(employees);
-        Console.WriteLine($"{recordsToInsert} Records Inserted");
-        return _helper.PressReturnToContinue();
-    }
-
+    #region Example 2  Group By Using a collection of input parameters
     public async Task<bool> GroupByACollectionOfParamsAsync()
     {
         string[] countryArray = new[] { "France", "Germany", "UK", "USA" };
@@ -100,7 +65,24 @@ public class Examples
         Console.WriteLine(_helper.Format2ColsNarrow, "Suppliers' Country", "Product Count");
         return _helper.PressReturnToContinue(count);
     }
+    #endregion
 
+    #region Example 3  Query that returns a DynamicType
+    public async Task<bool> QueryReturningDynamicType()
+    {
+        var sql = "select City, Region,ContactName from suppliers where Country='USA'";
+        dynamic suppliers = await _dba.QueryAsyncDynamic(sql);
+        Console.WriteLine(_helper.Format3ColsWide, "City", "Region", "ContactName");
+        foreach (var supplier in suppliers)
+        {
+            Console.WriteLine(_helper.Format3ColsWide, supplier.City, supplier.Region, supplier.ContactName);
+        }
+        Console.WriteLine(_helper.Format3ColsWide, "City", "Region", "Contact Name");
+        return _helper.PressReturnToContinue();
+    }
+    #endregion
+
+    #region Example 4 Map from tableA & tableB to ClassA containing a reference to ClassB
     public async Task<bool> Map2TablesTo1ClassAAsync()
     {
         string sql = @"select o.EmployeeID,o.OrderId, e.EmployeeID,e.FirstName,e.LastName
@@ -128,13 +110,14 @@ public class Examples
 
         return _helper.PressReturnToContinue(count);
     }
+    #endregion
 
-
+    #region Example 5 Map using a Northwind example Stored Procedure
     public async Task<bool> StoredProcedureCustomerOrderHistoryAsync()
     {
         (string paramName, object value) param;
         string customerID = "ANTON";//input param
-        param = _dba.IsSqlServer  ? ("@CustomerID", customerID) : ("AtCustomerID", customerID);
+        param = _dba.IsSqlServer ? ("@CustomerID", customerID) : ("AtCustomerID", customerID);
         var paramDic = new Dictionary<string, object>
         {
            { param.paramName, param.value }
@@ -151,6 +134,59 @@ public class Examples
         }
         return _helper.PressReturnToContinue(count);
     }
+    #endregion
+
+    #region Example 6 Insert into Employee table and return the new row identity Id
+    public async Task<bool> InsertEmployeeInstanceAAsync()
+    {
+        Employee employee = new()
+        {
+            FirstName = "Mini",
+            LastName = "Mouse",
+            BirthDate = new DateTime(1928, 01, 01)
+        };
+
+        string sql = _dba.IsSqlServer ? _spIds.InsertEmployeeTSQL : _spIds.InsertEmployeeMySQL;
+        var id = await _dba.QuerySingleAsync<int>(sql, employee);
+        var foundEmployee = await _helper.GetFirstOrDefaultEmployeeAsync(id);
+        Console.WriteLine($"The inserted record is {foundEmployee}");
+        Console.WriteLine($"Repeats of this example will insert a cloned mouse with a different ID");
+        var clones = await FindEmployeesByNameAsync(employee.LastName, employee.FirstName);
+        foreach (Employee clone in clones)
+        {
+            Console.WriteLine(clone.ToString());
+        }
+        return _helper.PressReturnToContinue();
+    }
+    #endregion
+
+    //example 7 see TransactionExample.cs
+
+    #region Example 8  Bulk Insert With Mapping 5 Records
+
+    public async Task<bool> BulkInsertAsyncMap()
+    {
+        var employees = GenerateRandomEmployeesM(recordsToInsert);
+        //Surname needs mapping Surname=>LastName
+        Dictionary<string, string> mappingDic = new() { { "Surname", "LastName" } };
+        await _dba.BulkInsertAsync(employees, mappingDic, table: "Employees");
+        Console.WriteLine($"{recordsToInsert} Records Inserted");
+        return _helper.PressReturnToContinue();
+    }
+    #endregion
+
+    #region Other Examples
+
+    public async Task<bool> BulkInsertAsync()
+    {
+        var employees = GenerateRandomEmployees(recordsToInsert);
+        await _dba.BulkInsertAsync(employees);
+        Console.WriteLine($"{recordsToInsert} Records Inserted");
+        return _helper.PressReturnToContinue();
+    }
+   
+   
+  
     public async Task<bool> MapToValueTupleAsync()
     {
         string sql = @"SELECT Products.ProductName, Products.UnitPrice
@@ -198,27 +234,6 @@ public class Examples
 
     }
 
-    public async Task<bool> InsertEmployeeInstanceAAsync()
-    {
-        Employee employee = new()
-        {
-            FirstName = "Mini",
-            LastName = "Mouse",
-            BirthDate = new DateTime(1928, 01, 01)
-        };
-      
-        string sql = _dba.IsSqlServer ?  _spIds.InsertEmployeeTSQL: _spIds.InsertEmployeeMySQL;
-        var id = await _dba.QuerySingleAsync<int>(sql, employee);
-        var foundEmployee = await _helper.GetFirstOrDefaultEmployeeAsync(id);
-        Console.WriteLine($"The inserted record is {foundEmployee}");
-        Console.WriteLine($"Repeats of this example will insert a cloned mouse with a different ID");
-        var clones = await FindEmployeesByNameAsync(employee.LastName, employee.FirstName);
-        foreach (Employee clone in clones)
-        {
-            Console.WriteLine(clone.ToString());
-        }
-        return _helper.PressReturnToContinue();
-    }
 
     public async Task<bool> Map2TablesTo1OrdersAAsync()
     {
@@ -247,14 +262,17 @@ public class Examples
 
         return _helper.PressReturnToContinue(count);
     }
+    #endregion
 
+    #region Private methods
     private async Task<IEnumerable<Employee>> FindEmployeesByNameAsync(string lastName, string firstName)
     {
-        string sql = @"select * from Employees where LastName = @LastName and FirstName=@FirstName order by EmployeeID Desc";
+        string tSql = @"select Top 12 * from Employees where LastName = @LastName and FirstName=@FirstName order by EmployeeID Desc";
+        string mySql = @"select * from Employees where LastName = @LastName and FirstName=@FirstName order by EmployeeID Desc limit 12";
+        string sql=_dba.IsSqlServer ? tSql: mySql;
         var employees = await _dba.QueryAsync<Employee>(sql,
         new { LastName = lastName, FirstName = firstName });
-
-        return employees.Take(12);
+        return employees;
     }
 
     private IEnumerable<Employee> GenerateRandomEmployees(int count)
@@ -268,7 +286,7 @@ public class Examples
                 FirstName = s,
                 BirthDate = DateTime.Today,//constraint <getdate()
             };
-            yield return employee; 
+            yield return employee;
         }
     }
 
@@ -286,5 +304,6 @@ public class Examples
             yield return employee; ;
         }
     }
+    #endregion
 
 }

@@ -79,7 +79,7 @@ namespace MssDapper.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 3. QueryReturningDynamicType.
+        ///   Looks up a localized string similar to 3. Query that returns a Dynamic Type.
         /// </summary>
         public static string item3 {
             get {

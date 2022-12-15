@@ -1,5 +1,4 @@
-﻿using Dapper;
-using System.Data;
+﻿using System.Data;
 
 namespace DataAccess
 {
