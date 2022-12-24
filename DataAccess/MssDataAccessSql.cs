@@ -85,7 +85,7 @@ public class MssDataAccessSql : IDataAccess
         object parameters,
         CommandType? commandType = null)
     {
-        using IDbConnection connection = _databaseContext.GetConnection(); ;
+        using IDbConnection connection = _databaseContext.GetConnection(); 
         await connection.ExecuteAsync(sql, parameters, commandType: commandType);
 
     }

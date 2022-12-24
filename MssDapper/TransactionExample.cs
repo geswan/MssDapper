@@ -35,7 +35,7 @@ namespace MssDapper
             await ExecuteTestTransactionAsync(idMicroA, 0);
             (Employee microMouseA, Employee microMouseB) = await FindTransactedMiceAsync(idMicroA, idMicroB);
             Console.WriteLine($"The following Micro mice were found : {microMouseA} {microMouseB}");
-            Console.WriteLine($"Repeating the transaction using the correct Ids. Both mice should be removed.");
+            Console.WriteLine($"Repeating the transaction using the correct Ids. Both mice should have been removed.");
             await ExecuteTestTransactionAsync(idMicroA, idMicroB);
             (microMouseA, microMouseB) = await FindTransactedMiceAsync(idMicroA, idMicroB);
             Console.WriteLine($"The following Micro mice were found : {microMouseA} {microMouseB}");

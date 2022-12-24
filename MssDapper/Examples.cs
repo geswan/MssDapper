@@ -20,13 +20,11 @@ public class Examples
     #region Example 1 Group By SubTotal
     public async Task<bool> SubtotalGroupByAsync()
     {
-        string mySql = @"SELECT `Order Details`.OrderID, 
-        Sum(`Order Details`.UnitPrice*Quantity*(1-Discount)) AS Subtotal
+        string mySql = @"SELECT `Order Details`.OrderID, Sum(`Order Details`.UnitPrice*Quantity*(1-Discount)) AS Subtotal
         FROM `Order Details`
         GROUP BY `Order Details`.OrderID;";
 
-        string tSql = @"SELECT [Order Details].OrderID, 
-        Sum([Order Details].UnitPrice*Quantity*(1-Discount)) AS Subtotal
+        string tSql = @"SELECT [Order Details].OrderID,Sum([Order Details].UnitPrice*Quantity*(1-Discount)) AS Subtotal
         FROM [Order Details]
         GROUP BY [Order Details].OrderID;";
         string sql = _dba.IsSqlServer ? tSql : mySql;

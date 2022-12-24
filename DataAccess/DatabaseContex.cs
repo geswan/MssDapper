@@ -13,7 +13,7 @@ public class SqlServerContext : IDatabaseContext
   //the snapshot is of the connection strings in appsettings.json
   //at the time when the class was instantiated.The class was added to the container 
   //as a transient
-    public SqlServerContext(IOptionsSnapshot<ServerOptions> serverOptionsSnapshot)
+    public SqlServerContext(IOptions<ServerOptions> serverOptionsSnapshot)
     {
         _serverOptions = serverOptionsSnapshot.Value;
         _connectionString = _serverOptions.MsSql;
@@ -32,7 +32,7 @@ public class MySqlServerContext : IDatabaseContext
     private readonly ServerOptions _serverOptions;
     private readonly string _connectionString;
     public bool IsSqlServer { get; } = false;
-    public MySqlServerContext(IOptionsSnapshot<ServerOptions> serverOptionsSnapshot)
+    public MySqlServerContext(IOptions<ServerOptions> serverOptionsSnapshot)
     {
       
         _serverOptions = serverOptionsSnapshot.Value;
