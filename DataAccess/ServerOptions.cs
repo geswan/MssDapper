@@ -3,6 +3,8 @@
 //The property names must match exactly the Connections in appsettings.json
 public class ServerOptions
 {
+    //not mapped, it's used to avoid a magic string when referencing
+    //appsettings "ConnectionStrings" section
     public const string ConnectionStrings = "ConnectionStrings";
 
     public string MsSql { get; set; } = string.Empty;

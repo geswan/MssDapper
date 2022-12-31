@@ -22,9 +22,9 @@
   in appsettings. If they are found, the connection strings in appsettings will not be used
   
   To run with MySql or MariaDb databases, in Program.cs 'Add services' region replace
-  services.AddTransient<IDatabaseContext, SqlServerContext>();
+  services.AddScoped<IConnectionCreator, MsSqlConnectionCreator>()
   with:
-  services.AddTransient<IDatabaseContext, MySqlServerContext>();
+   services.AddScoped<IConnectionCreator, MySqlConnectionCreator>()
 
   INSTALLING THE NORTHWIND DATABASE
   The Sql Create Database statements differ between TSql and MySql so you need to get 

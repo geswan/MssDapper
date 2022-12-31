@@ -6,14 +6,15 @@ using System.Transactions;
 namespace DataAccess;
 
 
-public class MssDataAccessSql : IDataAccess
+public class DatabaseContext : IDatabaseContext
 {
-    private readonly IDatabaseContext _databaseContext;
- 
-    public MssDataAccessSql(IDatabaseContext databaseContext)
+    private readonly IConnectionCreator _connectionCreator;
+
+
+    public DatabaseContext(IConnectionCreator connectionCreator)
     {
-        _databaseContext=databaseContext;
-       IsSqlServer= _databaseContext.IsSqlServer;
+        _connectionCreator=connectionCreator;
+       IsSqlServer = _connectionCreator is MsSqlConnectionCreator;
     }
 
     public bool IsSqlServer {get; }
@@ -23,7 +24,7 @@ public class MssDataAccessSql : IDataAccess
         CommandType? commandType = null)
     {
       
-        using IDbConnection connection = _databaseContext.GetConnection();
+        using IDbConnection connection = _connectionCreator.CreateConnection();
         var result = await connection.QueryAsync<T>(sql, parameters,
             commandType: commandType);
 
@@ -35,7 +36,7 @@ public class MssDataAccessSql : IDataAccess
        object? parameters = null,
        CommandType? commandType = null)
     {
-        using IDbConnection connection = _databaseContext.GetConnection();
+        using IDbConnection connection = _connectionCreator.CreateConnection();
         var result = await connection.QuerySingleAsync<T>(sql, parameters,
             commandType: commandType);
 
@@ -47,7 +48,7 @@ public class MssDataAccessSql : IDataAccess
      object? parameters,
     CommandType? commandType = null)
     {
-        using IDbConnection connection = _databaseContext.GetConnection();
+        using IDbConnection connection = _connectionCreator.CreateConnection();
 
         var result = await connection.QueryAsync<dynamic>(sql, parameters, commandType: commandType);
 
@@ -60,7 +61,7 @@ public class MssDataAccessSql : IDataAccess
        object? parameters = null,
        CommandType? commandType = null)
     {
-        using IDbConnection connection = _databaseContext.GetConnection();
+        using IDbConnection connection = _connectionCreator.CreateConnection();
         var result = await connection.QueryFirstOrDefaultAsync<T>(sql, parameters,
          commandType: commandType);
         return result;
@@ -73,7 +74,7 @@ public class MssDataAccessSql : IDataAccess
          string splitOn = "Id",//dapper converts this to  uppercase, so ID,id is accepted
         CommandType? commandType = null)
     {
-        using IDbConnection connection = _databaseContext.GetConnection();
+        using IDbConnection connection = _connectionCreator.CreateConnection();
 
         var results = await connection.QueryAsync(sql, mappingFunc, splitOn: splitOn, commandType: commandType);
 
@@ -85,7 +86,7 @@ public class MssDataAccessSql : IDataAccess
         object parameters,
         CommandType? commandType = null)
     {
-        using IDbConnection connection = _databaseContext.GetConnection(); 
+        using IDbConnection connection = _connectionCreator.CreateConnection();
         await connection.ExecuteAsync(sql, parameters, commandType: commandType);
 
     }
@@ -97,7 +98,7 @@ public class MssDataAccessSql : IDataAccess
    string? table = null
       )
     {
-        using IDbConnection connection = _databaseContext.GetConnection();
+        using IDbConnection connection = _connectionCreator.CreateConnection();
         await connection.BulkInsertAsync(items, mappingDic!,table);
 
     }
@@ -109,7 +110,7 @@ public class MssDataAccessSql : IDataAccess
       object parametersB,
       CommandType? commandType = null)
     {
-        using IDbConnection connection = _databaseContext.GetConnection();
+        using IDbConnection connection = _connectionCreator.CreateConnection();
         using var transScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
         connection.Open();
 

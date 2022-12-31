@@ -5,27 +5,28 @@ using Microsoft.Extensions.Logging;
 using MssDapper;
 
 
-/***Default settings for Application Builder
-  Load app IConfiguration from 'appsettings.json' 
-Load app IConfiguration from User Secrets when EnvironmentName is 'Development'
-Load app IConfiguration from environment variables.
-Configure the ILoggerFactory to log to the console, debug, and event source output.
+/***Default settings for HostApplicationBuilder:
+Loads app IConfiguration from 'appsettings.json' 
+Loads app IConfiguration from User Secrets when EnvironmentName is 'Development'
+Loads app IConfiguration from environment variables.
+Configures the ILoggerFactory to log to the console, debug, and event source output.
  ***/
 
 
 var builder = Host.CreateApplicationBuilder();
 #region Configuration
-
+//bind appsettings ConnectionStrings section members MsSql,MySql to
+//ServerOptions properties MsSql,MySql
 var section = builder.Configuration.GetSection(ServerOptions.ConnectionStrings);
 builder.Services.Configure<ServerOptions>(section);
 #endregion
 
 #region Add services
-builder.Services.AddScoped<IDataAccess, MssDataAccessSql>()
-               //Add SqlServerContext for MicrosoftSqlServer
-               //or add  MySqlServerContext for MySql or MariaDb
-               // AddTransient<IDatabaseContext, SqlServerContext>()
-               .AddTransient<IDatabaseContext, MySqlServerContext>()
+builder.Services.AddScoped<IDatabaseContext, DatabaseContext>()
+               //Add  MsSqlConnectionCreator for MicrosoftSqlServer
+               //or add  MySqlConnectionCreator for MySql or MariaDb
+               //  .AddScoped<IConnectionCreator, MsSqlConnectionCreator>()
+               .AddScoped<IConnectionCreator, MySqlConnectionCreator>()
                .AddScoped<SpExampleIds>()
                .AddScoped<Helper>()
                .AddScoped<Examples>()

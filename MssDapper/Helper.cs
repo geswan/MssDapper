@@ -5,9 +5,9 @@ namespace MssDapper
 {
     public class Helper
     {
-        private IDataAccess _dba;
+        private IDatabaseContext _dba;
         private Random random = new Random();
-        public Helper(IDataAccess dba)
+        public Helper(IDatabaseContext dba)
         {
             _dba = dba;
         }

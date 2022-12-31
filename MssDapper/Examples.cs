@@ -6,14 +6,14 @@ namespace MssDapper;
 
 public class Examples
 {
-    private readonly IDataAccess _dba;
+    private readonly IDatabaseContext _dbContext;
     private readonly SpExampleIds _spIds;
     private readonly Helper _helper;
     private readonly int recordsToInsert = 5;
  
-    public Examples(IDataAccess dba,SpExampleIds spIds, Helper helper)
+    public Examples(IDatabaseContext dbContext,SpExampleIds spIds, Helper helper)
     {
-        _dba = dba;
+        _dbContext = dbContext;
         _spIds = spIds;
         _helper = helper;
     }
@@ -27,8 +27,8 @@ public class Examples
         string tSql = @"SELECT [Order Details].OrderID,Sum([Order Details].UnitPrice*Quantity*(1-Discount)) AS Subtotal
         FROM [Order Details]
         GROUP BY [Order Details].OrderID;";
-        string sql = _dba.IsSqlServer ? tSql : mySql;
-        var summaries = await _dba.QueryAsync<Summary>(sql);
+        string sql = _dbContext.IsSqlServer ? tSql : mySql;
+        var summaries = await _dbContext.QueryAsync<Summary>(sql);
         Console.WriteLine(_helper.Format2ColsWide, "OrderID", "Subtotal");
         int count = 0;
         foreach (var summary in summaries)
@@ -51,7 +51,7 @@ public class Examples
              where Suppliers.Country in @countries
              Group by Suppliers.Country
              Order by ProductCount Desc;";
-        var results = await _dba.QueryAsync<(string SuppliersCountry, int ProductCount)>(sql, new { @countries = countryArray });
+        var results = await _dbContext.QueryAsync<(string SuppliersCountry, int ProductCount)>(sql, new { @countries = countryArray });
 
         Console.WriteLine(_helper.Format2ColsNarrow, "Suppliers' Country", "Product Count");
         int count = 0;
@@ -69,7 +69,7 @@ public class Examples
     public async Task<bool> QueryReturningDynamicType()
     {
         var sql = "select City, Region,ContactName from suppliers where Country='USA'";
-        dynamic suppliers = await _dba.QueryAsyncDynamic(sql);
+        dynamic suppliers = await _dbContext.QueryAsyncDynamic(sql);
         Console.WriteLine(_helper.Format3ColsWide, "City", "Region", "ContactName");
         foreach (var supplier in suppliers)
         {
@@ -88,7 +88,7 @@ public class Examples
                      inner join Employees e
                      on o.EmployeeID  = e.EmployeeID
                      order by e.LastName, e.FirstName";
-        var employeeOrders = await _dba.QueryAsync<Order, Employee>(sql,
+        var employeeOrders = await _dbContext.QueryAsync<Order, Employee>(sql,
              (order, employee) =>
              {
                  order.Employee = employee;
@@ -115,12 +115,12 @@ public class Examples
     {
         (string paramName, object value) param;
         string customerID = "ANTON";//input param
-        param = _dba.IsSqlServer ? ("@CustomerID", customerID) : ("AtCustomerID", customerID);
+        param = _dbContext.IsSqlServer ? ("@CustomerID", customerID) : ("AtCustomerID", customerID);
         var paramDic = new Dictionary<string, object>
         {
            { param.paramName, param.value }
         };
-        var results = await _dba.QueryAsync<(string product, int total)>(_spIds.CustomerOrderHistory,
+        var results = await _dbContext.QueryAsync<(string product, int total)>(_spIds.CustomerOrderHistory,
         new DynamicParameters(paramDic), commandType: CommandType.StoredProcedure);
 
         Console.WriteLine(_helper.Format2ColsWide, "Product Name", "Sales");
@@ -144,8 +144,8 @@ public class Examples
             BirthDate = new DateTime(1928, 01, 01)
         };
 
-        string sql = _dba.IsSqlServer ? _spIds.InsertEmployeeTSQL : _spIds.InsertEmployeeMySQL;
-        var id = await _dba.QuerySingleAsync<int>(sql, employee);
+        string sql = _dbContext.IsSqlServer ? _spIds.InsertEmployeeTSQL : _spIds.InsertEmployeeMySQL;
+        var id = await _dbContext.QuerySingleAsync<int>(sql, employee);
         var foundEmployee = await _helper.GetFirstOrDefaultEmployeeAsync(id);
         Console.WriteLine($"The inserted record is {foundEmployee}");
         Console.WriteLine($"Repeats of this example will insert a cloned mouse with a different ID");
@@ -167,7 +167,7 @@ public class Examples
         var employees = GenerateRandomEmployeesM(recordsToInsert);
         //Surname needs mapping Surname=>LastName
         Dictionary<string, string> mappingDic = new() { { "Surname", "LastName" } };
-        await _dba.BulkInsertAsync(employees, mappingDic, table: "Employees");
+        await _dbContext.BulkInsertAsync(employees, mappingDic, table: "Employees");
         Console.WriteLine($"{recordsToInsert} Records Inserted");
         return _helper.PressReturnToContinue();
     }
@@ -178,7 +178,7 @@ public class Examples
     public async Task<bool> BulkInsertAsync()
     {
         var employees = GenerateRandomEmployees(recordsToInsert);
-        await _dba.BulkInsertAsync(employees);
+        await _dbContext.BulkInsertAsync(employees);
         Console.WriteLine($"{recordsToInsert} Records Inserted");
         return _helper.PressReturnToContinue();
     }
@@ -191,7 +191,7 @@ public class Examples
              FROM Products
              order by Products.UnitPrice desc
              LIMIT 10";
-        var results = await _dba.QueryAsync<(string product, float price)>(sql);
+        var results = await _dbContext.QueryAsync<(string product, float price)>(sql);
         Console.WriteLine("The 10 Most Expensive Products");
         Console.WriteLine(_helper.Format2ColsWide, "Product", "Price");
         foreach ((string product, float price) in results)
@@ -207,7 +207,7 @@ public class Examples
         string sql = @"select * from Employees where LastName = @LastName and FirstName=@FirstName";
         string lastName = "King";//input param
         string firstName = "Robert";
-        var employee = await _dba.QueryFirstOrDefaultAsync<Employee>(sql,
+        var employee = await _dbContext.QueryFirstOrDefaultAsync<Employee>(sql,
         new { LastName = lastName, FirstName = firstName });
         Console.WriteLine($"Query is for {lastName} {firstName}");
         Console.WriteLine($"Found {employee}");
@@ -226,7 +226,7 @@ public class Examples
         var propValues = new { employee.FirstName, employee.LastName, employee.BirthDate };
         string sql = @"insert into Employees(FirstName,LastName,BirthDate)
                        values (FirstName,LastName,BirthDate)";
-        await _dba.ExecuteAsync(sql, propValues);
+        await _dbContext.ExecuteAsync(sql, propValues);
         Console.WriteLine($"{employee} inserted into the Database");
         return _helper.PressReturnToContinue();
 
@@ -240,7 +240,7 @@ public class Examples
                      inner join Employees et
                      on ot.EmployeeID  = et.EmployeeID
                      order by et.LastName, et.FirstName";
-        var employeeOrdersA = await _dba.QueryAsync<Order, Employee>(sql,
+        var employeeOrdersA = await _dbContext.QueryAsync<Order, Employee>(sql,
              (order, employee) =>
              {
                  order.Employee = employee;
@@ -267,8 +267,8 @@ public class Examples
     {
         string tSql = @"select Top 12 * from Employees where LastName = @LastName and FirstName=@FirstName order by EmployeeID Desc";
         string mySql = @"select * from Employees where LastName = @LastName and FirstName=@FirstName order by EmployeeID Desc limit 12";
-        string sql=_dba.IsSqlServer ? tSql: mySql;
-        var employees = await _dba.QueryAsync<Employee>(sql,
+        string sql=_dbContext.IsSqlServer ? tSql: mySql;
+        var employees = await _dbContext.QueryAsync<Employee>(sql,
         new { LastName = lastName, FirstName = firstName });
         return employees;
     }
@@ -282,7 +282,7 @@ public class Examples
                 EmployeeID = 0,
                 LastName = s.ToUpper(),
                 FirstName = s,
-                BirthDate = DateTime.Today,//constraint <getdate()
+                BirthDate = DateTime.Today,//constraint is  < getdate()
             };
             yield return employee;
         }

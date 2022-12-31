@@ -4,11 +4,11 @@ namespace MssDapper
 {
     public class TransactionExample
     {
-        private IDataAccess _dba;
+        private IDatabaseContext _dba;
         private readonly SpExampleIds _spIds;
         private Helper _helper;
 
-        public TransactionExample(IDataAccess dba,SpExampleIds spIds, Helper helper)
+        public TransactionExample(IDatabaseContext dba,SpExampleIds spIds, Helper helper)
         {
             _dba = dba;
             _spIds = spIds;
