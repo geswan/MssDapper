@@ -4,14 +4,11 @@ namespace MssDapper
 {
     public class TransactionExample
     {
-        private IDatabaseContext _dba;
-        private readonly SpExampleIds _spIds;
+        private IDatabaseContext _databaseContext;
         private Helper _helper;
-
-        public TransactionExample(IDatabaseContext dba,SpExampleIds spIds, Helper helper)
+        public TransactionExample(IDatabaseContext databaseContext,  Helper helper)
         {
-            _dba = dba;
-            _spIds = spIds;
+            _databaseContext = databaseContext;
             _helper = helper;
       
         }
@@ -25,10 +22,10 @@ namespace MssDapper
                 LastName = "Mouse",
                 BirthDate = new DateTime(2021, 12, 01)
             };
-            string sql = _dba.IsSqlServer ? _spIds.InsertEmployeeTSQL: _spIds.InsertEmployeeMySQL;
+            string sql = _databaseContext.IsSqlServer ? Constants.InsertEmployeeTSQL: Constants.InsertEmployeeMySQL;
 
-            var idMicroA = await _dba.QuerySingleAsync<int>(sql, employee);
-            var idMicroB = await _dba.QuerySingleAsync<int>(sql, employee);
+            var idMicroA = await _databaseContext.QuerySingleAsync<int>(sql, employee);
+            var idMicroB = await _databaseContext.QuerySingleAsync<int>(sql, employee);
             Console.WriteLine($"2 Micro mice inserted into the Employees table. Id mouse A is {idMicroA} Id mouse B is {idMicroB}");
             Console.WriteLine($"Executing a transaction to remove both mice...");
             Console.WriteLine($"The Id for Mouse A is correctly set but the Id for Mouse B is set to 0 and should throw an exception");
@@ -53,7 +50,7 @@ namespace MssDapper
                            where EmployeeID=@Id;";
             try
             {
-                await _dba.ExecuteTransactionAsync(sqlDelete, new { Id = idMicroA }, sqlDelete, new { Id = idMicroB });
+                await _databaseContext.ExecuteTransactionAsync(sqlDelete, new { Id = idMicroA }, sqlDelete, new { Id = idMicroB });
             }
             catch (Exception ex)
             {

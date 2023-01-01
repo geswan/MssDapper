@@ -27,7 +27,7 @@
    services.AddScoped<IConnectionCreator, MySqlConnectionCreator>()
 
   INSTALLING THE NORTHWIND DATABASE
-  The Sql Create Database statements differ between TSql and MySql so you need to get 
+  The Sql 'Create Database' statements differ between TSql and MySql so you need to get 
   the right version
   MySql Link: Zip file
   https://www.aspsnippets.com/Handlers/DownloadFile.ashx?File=9cb579c6-86db-4596-84c3-d549428fdcf5.zip

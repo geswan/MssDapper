@@ -1,15 +1,14 @@
 ﻿using DataAccess;
-using System;
 
 namespace MssDapper
 {
     public class Helper
     {
-        private IDatabaseContext _dba;
-        private Random random = new Random();
-        public Helper(IDatabaseContext dba)
+        private readonly IDatabaseContext _databaseContext;
+        private readonly Random random = new();
+        public Helper(IDatabaseContext databaseContext)
         {
-            _dba = dba;
+            _databaseContext = databaseContext;
         }
 
         public string Format2ColsNarrow { get; } = "    {0,-20:G} {1,10:G}";
@@ -32,7 +31,7 @@ namespace MssDapper
         public async Task<Employee> GetFirstOrDefaultEmployeeAsync(int id)
         {
             string sql = @"select * from Employees where EmployeeID = @Id";
-            Employee employee = await _dba.QueryFirstOrDefaultAsync<Employee>(sql,
+            Employee employee = await _databaseContext.QueryFirstOrDefaultAsync<Employee>(sql,
             new { Id = id });
             return employee;
         }

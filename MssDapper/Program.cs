@@ -23,20 +23,18 @@ builder.Services.Configure<ServerOptions>(section);
 
 #region Add services
 builder.Services.AddScoped<IDatabaseContext, DatabaseContext>()
-               //Add  MsSqlConnectionCreator for MicrosoftSqlServer
-               //or add  MySqlConnectionCreator for MySql or MariaDb
-               //  .AddScoped<IConnectionCreator, MsSqlConnectionCreator>()
-               .AddScoped<IConnectionCreator, MySqlConnectionCreator>()
-               .AddScoped<SpExampleIds>()
+              //Add  MsSqlConnectionCreator for MicrosoftSqlServer
+              //or add  MySqlConnectionCreator for MySql or MariaDb
+              .AddScoped<IConnectionCreator, MsSqlConnectionCreator>()
+               // .AddScoped<IConnectionCreator, MySqlConnectionCreator>()
+               .AddScoped<StoredProcedureId>()
                .AddScoped<Helper>()
                .AddScoped<Examples>()
                .AddScoped<TransactionExample>()
-               .AddScoped<Demo>();
+               .AddScoped<DemoA>();
 #endregion
 var app = builder.Build();
-var logger = app.Services.GetService<ILogger<Program>>();
-logger?.LogInformation("built app");
-var demo = app.Services.GetService<Demo>();
+var demo = app.Services.GetService<DemoA>();
 if (demo != null)
 {
     await demo.Run();

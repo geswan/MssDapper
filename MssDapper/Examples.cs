@@ -7,17 +7,17 @@ namespace MssDapper;
 public class Examples
 {
     private readonly IDatabaseContext _dbContext;
-    private readonly SpExampleIds _spIds;
+    private readonly StoredProcedureId _storedProcedureId;
     private readonly Helper _helper;
     private readonly int recordsToInsert = 5;
- 
-    public Examples(IDatabaseContext dbContext,SpExampleIds spIds, Helper helper)
+
+    public Examples(IDatabaseContext dbContext, StoredProcedureId storedProcedureId, Helper helper)
     {
         _dbContext = dbContext;
-        _spIds = spIds;
+        _storedProcedureId = storedProcedureId;
         _helper = helper;
     }
-    #region Example 1 Group By SubTotal
+    #region Example  Group By SubTotal
     public async Task<bool> SubtotalGroupByAsync()
     {
         string mySql = @"SELECT `Order Details`.OrderID, Sum(`Order Details`.UnitPrice*Quantity*(1-Discount)) AS Subtotal
@@ -42,7 +42,7 @@ public class Examples
     }
     #endregion
 
-    #region Example 2  Group By Using a collection of input parameters
+    #region Example Group By Using a collection of input parameters
     public async Task<bool> GroupByACollectionOfParamsAsync()
     {
         string[] countryArray = new[] { "France", "Germany", "UK", "USA" };
@@ -65,7 +65,7 @@ public class Examples
     }
     #endregion
 
-    #region Example 3  Query that returns a DynamicType
+    #region Example Query that returns a DynamicType
     public async Task<bool> QueryReturningDynamicType()
     {
         var sql = "select City, Region,ContactName from suppliers where Country='USA'";
@@ -80,15 +80,15 @@ public class Examples
     }
     #endregion
 
-    #region Example 4 Map from tableA & tableB to ClassA containing a reference to ClassB
-    public async Task<bool> Map2TablesTo1ClassAAsync()
+    #region Example Map from tableA & tableB to ClassA containing a reference to ClassB
+    public async Task<bool> Map2TablesTo1OrdersAAsync()
     {
-        string sql = @"select o.EmployeeID,o.OrderId, e.EmployeeID,e.FirstName,e.LastName
-                     from Orders o
-                     inner join Employees e
-                     on o.EmployeeID  = e.EmployeeID
-                     order by e.LastName, e.FirstName";
-        var employeeOrders = await _dbContext.QueryAsync<Order, Employee>(sql,
+        string sql = @"select ot.*, et.*
+                     from Orders ot
+                     inner join Employees et
+                     on ot.EmployeeID  = et.EmployeeID
+                     order by et.LastName, et.FirstName";
+        var employeeOrdersA = await _dbContext.QueryAsync<Order, Employee>(sql,
              (order, employee) =>
              {
                  order.Employee = employee;
@@ -98,7 +98,7 @@ public class Examples
         Console.WriteLine("Employee Orders ");
         Console.WriteLine(_helper.Format2ColsNarrow, "Employee Name", "Order Date");
         int count = 0;
-        foreach (Order emploeeOrderA in employeeOrders)
+        foreach (Order emploeeOrderA in employeeOrdersA)
         {
             count++;
             Console.WriteLine(_helper.Format2ColsNarrow, $"{emploeeOrderA?.Employee?.LastName} {emploeeOrderA?.Employee?.FirstName}",
@@ -108,9 +108,10 @@ public class Examples
 
         return _helper.PressReturnToContinue(count);
     }
+  
     #endregion
 
-    #region Example 5 Map using a Northwind example Stored Procedure
+    #region Example Map using a Northwind example Stored Procedure
     public async Task<bool> StoredProcedureCustomerOrderHistoryAsync()
     {
         (string paramName, object value) param;
@@ -120,7 +121,7 @@ public class Examples
         {
            { param.paramName, param.value }
         };
-        var results = await _dbContext.QueryAsync<(string product, int total)>(_spIds.CustomerOrderHistory,
+        var results = await _dbContext.QueryAsync<(string product, int total)>(_storedProcedureId.CustomerOrderHistory,
         new DynamicParameters(paramDic), commandType: CommandType.StoredProcedure);
 
         Console.WriteLine(_helper.Format2ColsWide, "Product Name", "Sales");
@@ -134,7 +135,7 @@ public class Examples
     }
     #endregion
 
-    #region Example 6 Insert into Employee table and return the new row identity Id
+    #region Example Insert into Employee table and return the new row identity Id
     public async Task<bool> InsertEmployeeInstanceAAsync()
     {
         Employee employee = new()
@@ -144,7 +145,7 @@ public class Examples
             BirthDate = new DateTime(1928, 01, 01)
         };
 
-        string sql = _dbContext.IsSqlServer ? _spIds.InsertEmployeeTSQL : _spIds.InsertEmployeeMySQL;
+        string sql = _dbContext.IsSqlServer ? Constants.InsertEmployeeTSQL :Constants.InsertEmployeeMySQL;
         var id = await _dbContext.QuerySingleAsync<int>(sql, employee);
         var foundEmployee = await _helper.GetFirstOrDefaultEmployeeAsync(id);
         Console.WriteLine($"The inserted record is {foundEmployee}");
@@ -158,9 +159,9 @@ public class Examples
     }
     #endregion
 
-    //example 7 see TransactionExample.cs
+    //examples  see also TransactionExample.cs
 
-    #region Example 8  Bulk Insert With Mapping 5 Records
+    #region Example Bulk Insert With Mapping 5 Records
 
     public async Task<bool> BulkInsertAsyncMap()
     {
@@ -233,33 +234,7 @@ public class Examples
     }
 
 
-    public async Task<bool> Map2TablesTo1OrdersAAsync()
-    {
-        string sql = @"select ot.*, et.*
-                     from Orders ot
-                     inner join Employees et
-                     on ot.EmployeeID  = et.EmployeeID
-                     order by et.LastName, et.FirstName";
-        var employeeOrdersA = await _dbContext.QueryAsync<Order, Employee>(sql,
-             (order, employee) =>
-             {
-                 order.Employee = employee;
-                 return order;
-             }, splitOn: "EmployeeID");
-
-        Console.WriteLine("Employee Orders ");
-        Console.WriteLine(_helper.Format2ColsNarrow, "Employee Name", "Order Date");
-        int count = 0;
-        foreach (Order emploeeOrderA in employeeOrdersA)
-        {
-            count++;
-            Console.WriteLine(_helper.Format2ColsNarrow, $"{emploeeOrderA?.Employee?.LastName} {emploeeOrderA?.Employee?.FirstName}",
-                emploeeOrderA?.OrderDate.ToShortDateString());
-        }
-        Console.WriteLine(_helper.Format2ColsNarrow, "Employee Name", "Order Date");
-
-        return _helper.PressReturnToContinue(count);
-    }
+  
     #endregion
 
     #region Private methods
@@ -303,5 +278,6 @@ public class Examples
         }
     }
     #endregion
+  
 
 }
