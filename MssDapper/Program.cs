@@ -23,10 +23,10 @@ builder.Services.Configure<ServerOptions>(section);
 
 #region Add services
 builder.Services.AddScoped<IDatabaseContext, DatabaseContext>()
-              //Add  MsSqlConnectionCreator for MicrosoftSqlServer
-              //or add  MySqlConnectionCreator for MySql or MariaDb
-              .AddScoped<IConnectionCreator, MsSqlConnectionCreator>()
-               // .AddScoped<IConnectionCreator, MySqlConnectionCreator>()
+               //Add  MsSqlConnectionCreator for MicrosoftSqlServer
+               //or add  MySqlConnectionCreator for MySql or MariaDb
+               .AddScoped<IConnectionCreator, MsSqlConnectionCreator>()
+               //.AddScoped<IConnectionCreator, MySqlConnectionCreator>()
                .AddScoped<StoredProcedureId>()
                .AddScoped<Helper>()
                .AddScoped<Examples>()

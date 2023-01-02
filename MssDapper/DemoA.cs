@@ -25,7 +25,7 @@ public class DemoA
              new MenuItem("Exit",async()=>await Task.FromResult(false))
         };
         int i = 1;
-        //reIndex the list.It facilitates the adding and removing of examples.
+        //reIndex the list.It facilitates editing the example menu items.
         foreach (var item in _menuItems)
         {
             item.Index = i;
@@ -56,7 +56,7 @@ public class DemoA
         if (!int.TryParse(choice, out int index))
         {
            
-            return true;
+            return true;//isContinue
         }
         var menuItem = _menuItems.FirstOrDefault((item) => item.Index == index);
         if (menuItem == null) return true; 
